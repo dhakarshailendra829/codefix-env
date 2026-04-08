@@ -1,0 +1,18 @@
+name: codefix-env
+version: "1.0.0"
+description: Real-world Python code debugging environment. Agents receive buggy code and tests, debug step-by-step, and submit fixes using actual code execution for deterministic grading.
+author: Shailendra
+tags:
+  - code-debugging
+  - software-engineering
+  - real-world
+tasks:
+  - name: easy-fix-syntax
+    description: Fix simple syntax error in add function
+    difficulty: easy
+  - name: medium-algorithm
+    description: Fix algorithmic bug with negative numbers
+    difficulty: medium
+  - name: hard-multi-function
+    description: Fix bugs across multiple functions
+    difficulty: hard
