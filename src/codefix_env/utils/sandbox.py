@@ -307,15 +307,18 @@ def run_code(code: str, test_code: str = "", timeout_s: float = 5.0) -> Executio
     proc.join(timeout=timeout_s)
 
     if proc.is_alive():
-        proc.kill()
+        proc.terminate()
         proc.join()
         return ExecutionResult(timed_out=True, exception=f"TimeoutError: exceeded {timeout_s}s")
 
-    if not q.empty():
-        return q.get_nowait()
-
-    return ExecutionResult(exception="ExecutionError: process exited without result", passed=False)
-
+    try:
+        result = q.get(timeout=0.5)
+        return result
+    except Exception:
+        return ExecutionResult(
+            exception="ExecutionError: process exited without result",
+            passed=False,
+        )
 
 def run_all_tests(code: str, test_cases: list, timeout_s: float = 5.0) -> list[ExecutionResult]:
     """
