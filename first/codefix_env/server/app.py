@@ -5,6 +5,7 @@ from codefix_env.server.codefix_environment import CodeFixEnvironment
 
 app = create_fastapi_app(CodeFixEnvironment, CodeFixAction, CodeFixObservation)
 
+
 @app.get("/health")
 def health():
     return {"status": "healthy", "environment": "codefix-env"}
@@ -12,6 +13,7 @@ def health():
 
 def main():
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8000)
 
 

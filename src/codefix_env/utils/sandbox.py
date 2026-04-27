@@ -320,6 +320,7 @@ def run_code(code: str, test_code: str = "", timeout_s: float = 5.0) -> Executio
             passed=False,
         )
 
+
 def run_all_tests(code: str, test_cases: list, timeout_s: float = 5.0) -> list[ExecutionResult]:
     """
     Run all test cases against the given code.

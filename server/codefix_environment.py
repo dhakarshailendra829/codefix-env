@@ -4,6 +4,7 @@ Server-Side Environment Wrapper
 Thin wrapper around CodeFixEnvironment for use inside the FastAPI server.
 Manages per-session state, serialisation, and concurrent session support.
 """
+
 from __future__ import annotations
 
 import uuid
@@ -33,9 +34,9 @@ class ServerEnvironment:
 
     def reset(
         self,
-        task_id:    Optional[str]        = None,
+        task_id: Optional[str] = None,
         difficulty: Optional[Difficulty] = None,
-        seed:       Optional[int]        = None,
+        seed: Optional[int] = None,
     ) -> CodeFixObservation:
         return self._env.reset(task_id=task_id, difficulty=difficulty, seed=seed)
 

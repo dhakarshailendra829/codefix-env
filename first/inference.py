@@ -10,7 +10,7 @@ from codefix_env.models import CodeFixAction
 # === REQUIRED VARIABLES (exactly as per official sample) ===
 API_BASE_URL = os.getenv("API_BASE_URL", "https://router.huggingface.co/v1")
 MODEL_NAME = os.getenv("MODEL_NAME", "Qwen/Qwen2.5-72B-Instruct")
-HF_TOKEN = os.getenv("HF_TOKEN")                    # Must come from environment variable
+HF_TOKEN = os.getenv("HF_TOKEN")  # Must come from environment variable
 
 TASK_NAME = os.getenv("TASK_NAME", "easy-fix-syntax")
 MAX_STEPS = 12
@@ -18,19 +18,29 @@ MAX_STEPS = 12
 # OpenAI Client
 client = OpenAI(base_url=API_BASE_URL, api_key=HF_TOKEN)
 
+
 def log_start(task: str, env: str, model: str):
     print(f"[START] task={task} env=codefix-env model={model}", flush=True)
+
 
 def log_step(step: int, action: str, reward: float, done: bool, error: Optional[str]):
     error_val = error if error else "null"
     done_val = str(done).lower()
-    print(f"[STEP] step={step} action={action} reward={reward:.2f} done={done_val} error={error_val}", flush=True)
+    print(
+        f"[STEP] step={step} action={action} reward={reward:.2f} done={done_val} error={error_val}",
+        flush=True,
+    )
+
 
 def log_end(success: bool, steps: int, rewards: List[float]):
     rewards_str = ",".join(f"{r:.2f}" for r in rewards)
     score = sum(rewards) / len(rewards) if rewards else 0.0
     score = min(max(score, 0.0), 1.0)
-    print(f"[END] success={str(success).lower()} steps={steps} score={score:.3f} rewards={rewards_str}", flush=True)
+    print(
+        f"[END] success={str(success).lower()} steps={steps} score={score:.3f} rewards={rewards_str}",
+        flush=True,
+    )
+
 
 async def main():
     env = CodeFixEnvironment()

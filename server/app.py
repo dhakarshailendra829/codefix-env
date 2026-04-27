@@ -18,6 +18,7 @@ Run::
 
     uvicorn server.app:app --reload --host 0.0.0.0 --port 8000
 """
+
 from __future__ import annotations
 
 import os
@@ -54,21 +55,23 @@ _server_start_time = time.time()
 
 # ── Request/Response Schemas ──────────────────────────────────────────────────
 
+
 class ResetRequest(BaseModel):
-    task_id:    Optional[str]        = None
+    task_id: Optional[str] = None
     difficulty: Optional[Difficulty] = None
-    seed:       Optional[int]        = None
+    seed: Optional[int] = None
 
 
 class HealthResponse(BaseModel):
-    status:        str
-    version:       str
-    uptime_s:      float
+    status: str
+    version: str
+    uptime_s: float
     active_sessions: int
-    task_counts:   dict
+    task_counts: dict
 
 
 # ── App factory ───────────────────────────────────────────────────────────────
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -100,6 +103,7 @@ app.add_middleware(
 
 # ── Middleware: request timing ────────────────────────────────────────────────
 
+
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
     t0 = time.perf_counter()
@@ -112,6 +116,7 @@ async def log_requests(request: Request, call_next):
 
 # ── Exception handlers ────────────────────────────────────────────────────────
 
+
 @app.exception_handler(KeyError)
 async def key_error_handler(request: Request, exc: KeyError):
     return JSONResponse(status_code=404, content={"error": str(exc)})
@@ -123,6 +128,7 @@ async def runtime_error_handler(request: Request, exc: RuntimeError):
 
 
 # ── Session helper ────────────────────────────────────────────────────────────
+
 
 def _get_session(session_id: Optional[str]) -> ServerEnvironment:
     """Retrieve session or raise 404."""
@@ -141,6 +147,7 @@ def _get_session(session_id: Optional[str]) -> ServerEnvironment:
 
 
 # ── Routes ────────────────────────────────────────────────────────────────────
+
 
 @app.get("/health", response_model=HealthResponse, tags=["system"])
 async def health():
@@ -181,7 +188,7 @@ async def step(
 ):
     """Execute one action in the environment."""
     session = _get_session(x_session_id)
-    result  = session.step(action)
+    result = session.step(action)
     return result.model_dump(mode="json")
 
 
@@ -201,14 +208,14 @@ async def get_tasks(
     return {
         "tasks": [
             {
-                "id":          t.id,
-                "title":       t.title,
+                "id": t.id,
+                "title": t.title,
                 "description": t.description,
-                "difficulty":  t.difficulty,
+                "difficulty": t.difficulty,
                 "bug_category": t.bug_category,
-                "tags":        t.tags,
-                "num_tests":   t.num_tests,
-                "max_steps":   t.max_steps,
+                "tags": t.tags,
+                "num_tests": t.num_tests,
+                "max_steps": t.max_steps,
             }
             for t in tasks
         ],
@@ -221,16 +228,16 @@ async def get_task(task_id: str):
     """Get full details of a specific task (without solution)."""
     task = load_task(task_id)
     return {
-        "id":           task.id,
-        "title":        task.title,
-        "description":  task.description,
-        "difficulty":   task.difficulty,
+        "id": task.id,
+        "title": task.title,
+        "description": task.description,
+        "difficulty": task.difficulty,
         "bug_category": task.bug_category,
-        "tags":         task.tags,
-        "buggy_code":   task.buggy_code,
-        "num_tests":    task.num_tests,
-        "max_steps":    task.max_steps,
-        "hints_count":  len(task.hints),
+        "tags": task.tags,
+        "buggy_code": task.buggy_code,
+        "num_tests": task.num_tests,
+        "max_steps": task.max_steps,
+        "hints_count": len(task.hints),
     }
 
 
@@ -239,6 +246,6 @@ async def metrics():
     """Server-level metrics."""
     return {
         "active_sessions": len(session_manager),
-        "task_counts":     task_count(),
-        "uptime_s":        round(time.time() - _server_start_time, 1),
+        "task_counts": task_count(),
+        "uptime_s": round(time.time() - _server_start_time, 1),
     }
