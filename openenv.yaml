@@ -1,18 +1,72 @@
 name: codefix-env
-version: "1.0.0"
-description: Real-world Python code debugging environment. Agents receive buggy code and tests, debug step-by-step, and submit fixes using actual code execution for deterministic grading.
-author: Shailendra
-tags:
-  - code-debugging
-  - software-engineering
-  - real-world
+version: "0.2.0"
+description: >
+  A high-performance PyTorch-based RL environment for automated Python code
+  debugging and LLM agent evaluation. Built on Meta OpenEnv / Gymnasium API.
+
+author: Shailendra Dhakar
+license: MIT
+repository: https://github.com/dhakarshailendra829/codefix-env
+
+# OpenEnv compatibility
+openenv_version: ">=0.1.0"
+api_style: gymnasium
+
+# Server config
+server:
+  module: server.app
+  app: app
+  host: "0.0.0.0"
+  port: 8000
+  workers: 2
+
+# Environment metadata
+environment:
+  action_type: CodeFixAction
+  observation_type: CodeFixObservation
+  state_type: CodeFixState
+  max_steps: 20
+  episode_based: true
+
+# Available tasks
 tasks:
-  - name: easy-fix-syntax
-    description: Fix simple syntax error in add function
-    difficulty: easy
-  - name: medium-algorithm
-    description: Fix algorithmic bug with negative numbers
-    difficulty: medium
-  - name: hard-multi-function
-    description: Fix bugs across multiple functions
-    difficulty: hard
+  easy:
+    count: 8
+    categories: [syntax_error, logic_bug, off_by_one, type_error, return_bug, wrong_operator, index_error]
+  medium:
+    count: 8
+    categories: [algorithm_bug, recursion_bug, scope_bug, mutable_default, logic_bug]
+  hard:
+    count: 5
+    categories: [multi_function, lru_cache, graph_algorithm, decorator, data_structures]
+
+# Dependencies
+requires:
+  python: ">=3.10"
+  packages:
+    - fastapi>=0.110.0
+    - pydantic>=2.6.0
+    - torch>=2.2.0
+    - httpx>=0.27.0
+    - structlog>=24.1.0
+    - rich>=13.7.0
+
+# Deployment
+docker:
+  image: ghcr.io/dhakarshailendra829/codefix-env
+  dockerfile: server/Dockerfile
+  port: 8000
+
+huggingface:
+  space: dhakarshailendra829/codefix-env
+  sdk: docker
+
+tags:
+  - reinforcement-learning
+  - code-debugging
+  - pytorch
+  - llm
+  - gymnasium
+  - openenv
+  - genai
+  - software-engineering
