@@ -18,6 +18,7 @@ Requirements:
 Run:
     python examples/grpo_training.py --model Qwen/Qwen2.5-1.5B-Instruct
 """
+
 from __future__ import annotations
 
 import argparse
@@ -27,6 +28,8 @@ import logging
 import os
 import sys
 from typing import Optional
+
+from codefix_env.models import CodeFixAction, CodeFixClient
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
@@ -55,6 +58,7 @@ Rules:
 - Think step by step in reasoning field
 """
 
+
 def build_prompt(obs) -> str:
     """Build the user prompt from a CodeFixObservation."""
     lines = obs.current_code.splitlines()
@@ -82,6 +86,7 @@ What action will you take? Respond with JSON only."""
 
 
 # ── Reward Function for GRPO ──────────────────────────────────────────────────
+
 
 class CodeFixRewardFunction:
     """
@@ -114,8 +119,6 @@ class CodeFixRewardFunction:
 
     async def _eval_single(self, prompt: str, completion: str, context: dict) -> float:
         """Execute one action and return reward."""
-        from codefix_env import CodeFixAction, CodeFixClient
-
         # Parse action from LLM output
         action = self._parse_action(completion)
         if action is None:
@@ -136,10 +139,8 @@ class CodeFixRewardFunction:
             return 0.0
 
     @staticmethod
-    def _parse_action(text: str) -> Optional["CodeFixAction"]:
+    def _parse_action(text: str) -> CodeFixAction | None:
         """Parse LLM output into a CodeFixAction. Returns None if invalid."""
-        from codefix_env import CodeFixAction
-
         # Strip markdown code fences if present
         text = text.strip()
         if text.startswith("```"):
@@ -156,6 +157,7 @@ class CodeFixRewardFunction:
 
 # ── Training Loop ─────────────────────────────────────────────────────────────
 
+
 def build_dataset(num_episodes: int = 100, task_ids: Optional[list[str]] = None):
     """
     Build a HuggingFace Dataset of (prompt, session_id) pairs for GRPO.
@@ -163,8 +165,8 @@ def build_dataset(num_episodes: int = 100, task_ids: Optional[list[str]] = None)
     """
     try:
         from datasets import Dataset
-    except ImportError:
-        raise ImportError("Install with: pip install codefix-env[llm]")
+    except Exception as e:
+        raise RuntimeError("Failed to import datasets") from e
 
     import httpx
 
@@ -179,17 +181,20 @@ def build_dataset(num_episodes: int = 100, task_ids: Optional[list[str]] = None)
 
             # Build observation object
             from codefix_env import CodeFixObservation
+
             obs = CodeFixObservation.model_validate(obs_data)
 
-            rows.append({
-                "prompt": [
-                    {"role": "system", "content": SYSTEM_PROMPT},
-                    {"role": "user",   "content": build_prompt(obs)},
-                ],
-                "session_id": session_id,
-                "task_id":    obs.task_id,
-                "difficulty": obs.difficulty,
-            })
+            rows.append(
+                {
+                    "prompt": [
+                        {"role": "system", "content": SYSTEM_PROMPT},
+                        {"role": "user", "content": build_prompt(obs)},
+                    ],
+                    "session_id": session_id,
+                    "task_id": obs.task_id,
+                    "difficulty": obs.difficulty,
+                }
+            )
         except Exception as e:
             logger.warning("Failed to reset env for row %d: %s", i, e)
 
@@ -218,8 +223,8 @@ def train(
     try:
         from transformers import AutoTokenizer
         from trl import GRPOConfig, GRPOTrainer
-    except ImportError:
-        raise ImportError("Install with: pip install codefix-env[llm]")
+    except Exception as e:
+        raise RuntimeError("Bad input") from e
 
     print(f"Loading model: {model_name}")
     tokenizer = AutoTokenizer.from_pretrained(model_name)
@@ -262,14 +267,15 @@ def train(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="GRPO training with CodeFix-Env")
-    parser.add_argument("--model",       default="Qwen/Qwen2.5-1.5B-Instruct")
-    parser.add_argument("--output-dir",  default="./outputs/grpo_codefix")
-    parser.add_argument("--steps",       type=int, default=500)
-    parser.add_argument("--batch-size",  type=int, default=4)
-    parser.add_argument("--lr",          type=float, default=1e-5)
-    parser.add_argument("--server-url",  default="http://localhost:8000")
-    parser.add_argument("--demo",        action="store_true",
-                        help="Run a quick demo without actual training")
+    parser.add_argument("--model", default="Qwen/Qwen2.5-1.5B-Instruct")
+    parser.add_argument("--output-dir", default="./outputs/grpo_codefix")
+    parser.add_argument("--steps", type=int, default=500)
+    parser.add_argument("--batch-size", type=int, default=4)
+    parser.add_argument("--lr", type=float, default=1e-5)
+    parser.add_argument("--server-url", default="http://localhost:8000")
+    parser.add_argument(
+        "--demo", action="store_true", help="Run a quick demo without actual training"
+    )
     args = parser.parse_args()
 
     if args.demo:

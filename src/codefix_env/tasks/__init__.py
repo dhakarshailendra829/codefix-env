@@ -1,6 +1,7 @@
 """
 Task Registry — Central access point for all CodeFix tasks.
 """
+
 from __future__ import annotations
 
 import random
@@ -12,15 +13,12 @@ from codefix_env.tasks.hard import HARD_TASKS
 from codefix_env.tasks.medium import MEDIUM_TASKS
 
 # ── Master registry ──────────────────────────────────────────────────────────
-ALL_TASKS: dict[str, Task] = {
-    task.id: task
-    for task in EASY_TASKS + MEDIUM_TASKS + HARD_TASKS
-}
+ALL_TASKS: dict[str, Task] = {task.id: task for task in EASY_TASKS + MEDIUM_TASKS + HARD_TASKS}
 
 TASKS_BY_DIFFICULTY: dict[Difficulty, list[Task]] = {
-    Difficulty.EASY:   EASY_TASKS,
+    Difficulty.EASY: EASY_TASKS,
     Difficulty.MEDIUM: MEDIUM_TASKS,
-    Difficulty.HARD:   HARD_TASKS,
+    Difficulty.HARD: HARD_TASKS,
 }
 
 
@@ -59,10 +57,10 @@ def list_tasks(difficulty: Optional[Difficulty] = None) -> list[Task]:
 def task_count() -> dict[str, int]:
     """Return count of tasks by difficulty."""
     return {
-        "easy":   len(EASY_TASKS),
+        "easy": len(EASY_TASKS),
         "medium": len(MEDIUM_TASKS),
-        "hard":   len(HARD_TASKS),
-        "total":  len(ALL_TASKS),
+        "hard": len(HARD_TASKS),
+        "total": len(ALL_TASKS),
     }
 
 

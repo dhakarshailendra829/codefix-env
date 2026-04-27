@@ -8,6 +8,7 @@ High-level reward computation that combines:
 
 Used by the environment server on every step.
 """
+
 from __future__ import annotations
 
 import logging
@@ -25,7 +26,6 @@ from codefix_env.utils.metrics import (
     compute_diff_score,
     compute_final_score,
     compute_shaped_reward,
-    compute_test_score,
 )
 
 logger = logging.getLogger(__name__)
@@ -70,10 +70,10 @@ class RewardPipeline:
 
     def step_reward(
         self,
-        prev_obs:    CodeFixObservation,
-        curr_obs:    CodeFixObservation,
+        prev_obs: CodeFixObservation,
+        curr_obs: CodeFixObservation,
         action_type: ActionType,
-        task:        Task,
+        task: Task,
     ) -> float:
         """
         Compute dense reward for a single step.
@@ -94,7 +94,7 @@ class RewardPipeline:
 
         # Neural component
         diff_score = compute_diff_score(curr_obs.original_code, curr_obs.current_code)
-        action_id  = list(ActionType).index(action_type) if action_type in list(ActionType) else 0
+        action_id = list(ActionType).index(action_type) if action_type in list(ActionType) else 0
         neural_reward = self._neural_model.predict(
             tests_passed_ratio=curr_obs.tests_passed / max(curr_obs.tests_total, 1),
             step_ratio=curr_obs.step_count / max(task.max_steps, 1),
@@ -113,7 +113,7 @@ class RewardPipeline:
     def episode_reward(
         self,
         final_obs: CodeFixObservation,
-        task:      Task,
+        task: Task,
     ) -> float:
         """Final episode reward on termination."""
         return compute_final_score(
@@ -126,8 +126,8 @@ class RewardPipeline:
 
     def build_metrics(
         self,
-        task:         Task,
-        final_obs:    CodeFixObservation,
+        task: Task,
+        final_obs: CodeFixObservation,
         total_reward: float,
     ) -> EpisodeMetrics:
         return EpisodeMetrics(

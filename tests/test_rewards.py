@@ -1,11 +1,13 @@
 """
 Tests for reward computation — rule-based and neural model.
 """
+
 from __future__ import annotations
 
-import pytest
 import torch
 
+from codefix_env.models import ActionType, BugCategory, CodeFixObservation, Difficulty
+from codefix_env.rewards import RewardPipeline
 from codefix_env.utils.metrics import (
     EpisodeMetrics,
     RewardMLP,
@@ -15,11 +17,9 @@ from codefix_env.utils.metrics import (
     compute_shaped_reward,
     compute_test_score,
 )
-from codefix_env.rewards import RewardPipeline
-from codefix_env.models import ActionType, CodeFixObservation, Difficulty, BugCategory
-
 
 # ── compute_test_score ────────────────────────────────────────────────────────
+
 
 class TestComputeTestScore:
     def test_all_pass(self):
@@ -37,38 +37,62 @@ class TestComputeTestScore:
 
 # ── compute_shaped_reward ─────────────────────────────────────────────────────
 
+
 class TestShapedReward:
     def test_progress_gives_positive_reward(self):
         r = compute_shaped_reward(
-            prev_passed=0, curr_passed=2, tests_total=4,
-            step_count=1, hints_used=0, action_type="run_tests",
+            prev_passed=0,
+            curr_passed=2,
+            tests_total=4,
+            step_count=1,
+            hints_used=0,
+            action_type="run_tests",
         )
         assert r > 0.0
 
     def test_regression_gives_negative_reward(self):
         r = compute_shaped_reward(
-            prev_passed=3, curr_passed=1, tests_total=4,
-            step_count=1, hints_used=0, action_type="run_tests",
+            prev_passed=3,
+            curr_passed=1,
+            tests_total=4,
+            step_count=1,
+            hints_used=0,
+            action_type="run_tests",
         )
         assert r < 0.0
 
     def test_solve_bonus_applied(self):
         cfg = ScoringConfig(solve_bonus=0.5)
         r = compute_shaped_reward(
-            prev_passed=3, curr_passed=4, tests_total=4,
-            step_count=1, hints_used=0, action_type="submit_fix", cfg=cfg,
+            prev_passed=3,
+            curr_passed=4,
+            tests_total=4,
+            step_count=1,
+            hints_used=0,
+            action_type="submit_fix",
+            cfg=cfg,
         )
         assert r > 0.5
 
     def test_hint_penalty_applied(self):
         cfg = ScoringConfig(hint_penalty=0.1)
         r_no_hint = compute_shaped_reward(
-            prev_passed=2, curr_passed=2, tests_total=4,
-            step_count=1, hints_used=0, action_type="run_tests", cfg=cfg,
+            prev_passed=2,
+            curr_passed=2,
+            tests_total=4,
+            step_count=1,
+            hints_used=0,
+            action_type="run_tests",
+            cfg=cfg,
         )
         r_with_hint = compute_shaped_reward(
-            prev_passed=2, curr_passed=2, tests_total=4,
-            step_count=1, hints_used=1, action_type="run_tests", cfg=cfg,
+            prev_passed=2,
+            curr_passed=2,
+            tests_total=4,
+            step_count=1,
+            hints_used=1,
+            action_type="run_tests",
+            cfg=cfg,
         )
         assert r_with_hint < r_no_hint
 
@@ -76,17 +100,28 @@ class TestShapedReward:
         """Later steps get smaller rewards for same progress."""
         cfg = ScoringConfig(time_decay_gamma=0.9)
         r_early = compute_shaped_reward(
-            prev_passed=0, curr_passed=1, tests_total=4,
-            step_count=1, hints_used=0, action_type="edit_line", cfg=cfg,
+            prev_passed=0,
+            curr_passed=1,
+            tests_total=4,
+            step_count=1,
+            hints_used=0,
+            action_type="edit_line",
+            cfg=cfg,
         )
         r_late = compute_shaped_reward(
-            prev_passed=0, curr_passed=1, tests_total=4,
-            step_count=15, hints_used=0, action_type="edit_line", cfg=cfg,
+            prev_passed=0,
+            curr_passed=1,
+            tests_total=4,
+            step_count=15,
+            hints_used=0,
+            action_type="edit_line",
+            cfg=cfg,
         )
         assert r_early > r_late
 
 
 # ── compute_final_score ───────────────────────────────────────────────────────
+
 
 class TestFinalScore:
     def test_perfect_score(self):
@@ -117,6 +152,7 @@ class TestFinalScore:
 
 # ── compute_diff_score ────────────────────────────────────────────────────────
 
+
 class TestDiffScore:
     def test_identical_code_zero(self):
         code = "def foo():\n    return 1\n"
@@ -134,6 +170,7 @@ class TestDiffScore:
 
 
 # ── RewardMLP ─────────────────────────────────────────────────────────────────
+
 
 class TestRewardMLP:
     def test_model_output_shape(self):
@@ -174,6 +211,7 @@ class TestRewardMLP:
 
 # ── RewardPipeline ────────────────────────────────────────────────────────────
 
+
 def _make_obs(**kwargs) -> CodeFixObservation:
     defaults = dict(
         current_code="def f(): pass",
@@ -197,6 +235,7 @@ class TestRewardPipeline:
     def test_step_reward_progress(self):
         pipeline = RewardPipeline()
         from codefix_env.tasks import load_task
+
         task = load_task("easy-001-missing-return")
         prev = _make_obs(tests_passed=0)
         curr = _make_obs(tests_passed=3)
@@ -206,6 +245,7 @@ class TestRewardPipeline:
     def test_episode_reward_solved(self):
         pipeline = RewardPipeline()
         from codefix_env.tasks import load_task
+
         task = load_task("easy-001-missing-return")
         obs = _make_obs(tests_passed=4, all_tests_pass=True)
         r = pipeline.episode_reward(obs, task)
@@ -218,30 +258,55 @@ class TestRewardPipeline:
 
 # ── EpisodeMetrics ────────────────────────────────────────────────────────────
 
+
 class TestEpisodeMetrics:
     def test_efficiency_when_solved(self):
         m = EpisodeMetrics(
-            task_id="t1", solved=True, final_score=0.9,
-            total_steps=5, hints_used=0, tests_passed=4,
-            tests_total=4, total_reward=2.0,
+            task_id="t1",
+            solved=True,
+            final_score=0.9,
+            total_steps=5,
+            hints_used=0,
+            tests_passed=4,
+            tests_total=4,
+            total_reward=2.0,
         )
         assert m.efficiency > 0.0
 
     def test_efficiency_zero_when_not_solved(self):
         m = EpisodeMetrics(
-            task_id="t1", solved=False, final_score=0.2,
-            total_steps=20, hints_used=2, tests_passed=1,
-            tests_total=4, total_reward=0.5,
+            task_id="t1",
+            solved=False,
+            final_score=0.2,
+            total_steps=20,
+            hints_used=2,
+            tests_passed=1,
+            tests_total=4,
+            total_reward=0.5,
         )
         assert m.efficiency == 0.0
 
     def test_to_dict_keys(self):
         m = EpisodeMetrics(
-            task_id="t1", solved=True, final_score=1.0,
-            total_steps=3, hints_used=0, tests_passed=4,
-            tests_total=4, total_reward=3.0,
+            task_id="t1",
+            solved=True,
+            final_score=1.0,
+            total_steps=3,
+            hints_used=0,
+            tests_passed=4,
+            tests_total=4,
+            total_reward=3.0,
         )
         d = m.to_dict()
-        expected_keys = {"task_id", "solved", "final_score", "total_steps",
-                         "hints_used", "tests_passed", "tests_total", "total_reward", "efficiency"}
+        expected_keys = {
+            "task_id",
+            "solved",
+            "final_score",
+            "total_steps",
+            "hints_used",
+            "tests_passed",
+            "tests_total",
+            "total_reward",
+            "efficiency",
+        }
         assert expected_keys == set(d.keys())

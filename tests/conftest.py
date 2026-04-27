@@ -2,6 +2,7 @@
 pytest configuration — runs before any tests.
 Fixes Windows multiprocessing spawn method for sandbox isolation.
 """
+
 import multiprocessing
 import sys
 

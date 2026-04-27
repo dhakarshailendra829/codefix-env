@@ -29,7 +29,7 @@ jobs:
         run: ruff check src/ tests/ examples/
 
       - name: Run black (check only)
-        run: black --check --target-version py310 --target-version py311 --target-version py312 src/ tests/ examples/
+        run: black --check --target-version py310 src/ tests/ examples/
 
       - name: Run isort (check only)
         run: isort --check-only src/ tests/ examples/

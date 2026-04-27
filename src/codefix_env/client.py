@@ -15,11 +15,11 @@ Usage::
         obs = env.reset()
         result = env.step(CodeFixAction(action_type="run_tests"))
 """
+
 from __future__ import annotations
 
 import asyncio
 import logging
-from contextlib import asynccontextmanager
 from typing import Optional
 
 import httpx
@@ -43,12 +43,12 @@ class CodeFixClient:
 
     def __init__(
         self,
-        base_url:    str   = "http://localhost:8000",
-        timeout:     float = 30.0,
-        max_retries: int   = 3,
+        base_url: str = "http://localhost:8000",
+        timeout: float = 30.0,
+        max_retries: int = 3,
     ):
-        self.base_url    = base_url.rstrip("/")
-        self.timeout     = timeout
+        self.base_url = base_url.rstrip("/")
+        self.timeout = timeout
         self.max_retries = max_retries
         self._client: Optional[httpx.AsyncClient] = None
 
@@ -77,16 +77,18 @@ class CodeFixClient:
 
     async def reset(
         self,
-        task_id:    Optional[str]        = None,
+        task_id: Optional[str] = None,
         difficulty: Optional[Difficulty] = None,
-        seed:       Optional[int]        = None,
+        seed: Optional[int] = None,
     ) -> CodeFixObservation:
         """Reset the environment and return the initial observation."""
         payload: dict = {}
-        if task_id:    payload["task_id"]    = task_id
-        if difficulty: payload["difficulty"] = difficulty
-        if seed is not None: payload["seed"] = seed
-
+        if task_id:
+            payload["task_id"] = task_id
+        if difficulty:
+            payload["difficulty"] = difficulty
+        if seed is not None:
+            payload["seed"] = seed
         data = await self._post("/reset", payload)
         return CodeFixObservation.model_validate(data)
 
@@ -122,15 +124,23 @@ class CodeFixClient:
                 r.raise_for_status()
                 return r.json()
             except httpx.HTTPStatusError as e:
-                logger.error("HTTP %d on POST %s: %s", e.response.status_code, path, e.response.text)
+                logger.error(
+                    "HTTP %d on POST %s: %s", e.response.status_code, path, e.response.text
+                )
                 raise
-            except httpx.TransportError as e:
+            except httpx.TransportError:
+                logger.error(
+                    "Transport error on POST %s (attempt %d/%d)",
+                    path,
+                    attempt + 1,
+                    self.max_retries,
+                )
                 if attempt == self.max_retries - 1:
                     raise
                 await asyncio.sleep(0.5 * (attempt + 1))
         raise RuntimeError(f"Failed after {self.max_retries} retries")
 
-    async def _get(self, path: str, params: Optional[dict] = None) -> dict:
+    async def _get(self, path: str, params: dict | None = None) -> dict:
         assert self._client, "Use `async with CodeFixClient(...) as env:`"
         r = await self._client.get(path, params=params)
         r.raise_for_status()

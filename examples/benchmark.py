@@ -16,6 +16,7 @@ Run:
     python examples/benchmark.py --agent random
     python examples/benchmark.py --agent oracle
 """
+
 from __future__ import annotations
 
 import argparse
@@ -29,8 +30,8 @@ from dataclasses import dataclass, field
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 from rich.console import Console
+from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn
 from rich.table import Table
-from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn
 
 from codefix_env import (
     ActionType,
@@ -41,12 +42,12 @@ from codefix_env import (
     list_tasks,
     task_count,
 )
-from codefix_env.utils.metrics import EpisodeMetrics
 
 console = Console()
 
 
 # ── Base Agent ────────────────────────────────────────────────────────────────
+
 
 class BaseAgent(ABC):
     """Abstract base for benchmark agents."""
@@ -67,18 +68,21 @@ class BaseAgent(ABC):
 
 # ── Built-in Agents ───────────────────────────────────────────────────────────
 
+
 class RandomAgent(BaseAgent):
     """Takes completely random valid actions."""
 
     def act(self, obs: CodeFixObservation) -> CodeFixAction:
         lines = obs.current_code.splitlines()
         n_lines = max(len(lines), 1)
-        choice = random.choice([
-            ActionType.RUN_TESTS,
-            ActionType.RUN_TESTS,   # weight run_tests higher
-            ActionType.EDIT_LINE,
-            ActionType.SUBMIT_FIX,
-        ])
+        choice = random.choice(
+            [
+                ActionType.RUN_TESTS,
+                ActionType.RUN_TESTS,  # weight run_tests higher
+                ActionType.EDIT_LINE,
+                ActionType.SUBMIT_FIX,
+            ]
+        )
         if choice == ActionType.EDIT_LINE:
             ln = random.randint(1, n_lines)
             return CodeFixAction(
@@ -119,6 +123,7 @@ class OracleAgent(BaseAgent):
     def reset(self, obs: CodeFixObservation) -> None:
         # Load the task to get solution (cheating!)
         from codefix_env.tasks import load_task
+
         task = load_task(obs.task_id)
         self._solution_lines = task.solution_code.splitlines()
         self._edit_idx = 0
@@ -131,9 +136,7 @@ class OracleAgent(BaseAgent):
         curr_lines = obs.current_code.splitlines()
 
         # Find first differing line
-        for i, (curr, sol) in enumerate(
-            zip(curr_lines, self._solution_lines), start=1
-        ):
+        for i, (curr, sol) in enumerate(zip(curr_lines, self._solution_lines), start=1):
             if curr != sol:
                 return CodeFixAction(
                     action_type=ActionType.EDIT_LINE,
@@ -161,36 +164,40 @@ class OracleAgent(BaseAgent):
 
 # ── Benchmark Runner ──────────────────────────────────────────────────────────
 
+
 @dataclass
 class BenchmarkResult:
-    task_id:    str
+    task_id: str
     difficulty: str
-    solved:     bool
-    steps:      int
-    score:      float
-    time_s:     float
+    solved: bool
+    steps: int
+    score: float
+    time_s: float
     hints_used: int
 
 
 @dataclass
 class BenchmarkSummary:
     agent_name: str
-    results:    list[BenchmarkResult] = field(default_factory=list)
+    results: list[BenchmarkResult] = field(default_factory=list)
 
     @property
     def solve_rate(self) -> float:
-        if not self.results: return 0.0
+        if not self.results:
+            return 0.0
         return sum(r.solved for r in self.results) / len(self.results)
 
     @property
     def avg_score(self) -> float:
-        if not self.results: return 0.0
+        if not self.results:
+            return 0.0
         return sum(r.score for r in self.results) / len(self.results)
 
     @property
     def avg_steps(self) -> float:
         solved = [r for r in self.results if r.solved]
-        if not solved: return 0.0
+        if not solved:
+            return 0.0
         return sum(r.steps for r in solved) / len(solved)
 
     def by_difficulty(self) -> dict[str, dict]:
@@ -200,10 +207,10 @@ class BenchmarkSummary:
             if not subset:
                 continue
             out[diff] = {
-                "total":      len(subset),
-                "solved":     sum(r.solved for r in subset),
+                "total": len(subset),
+                "solved": sum(r.solved for r in subset),
                 "solve_rate": sum(r.solved for r in subset) / len(subset),
-                "avg_score":  sum(r.score for r in subset) / len(subset),
+                "avg_score": sum(r.score for r in subset) / len(subset),
             }
         return out
 
@@ -248,15 +255,17 @@ def run_benchmark(
                 done = result.done or result.truncated
 
             elapsed = time.perf_counter() - t0
-            summary.results.append(BenchmarkResult(
-                task_id=task.id,
-                difficulty=task.difficulty,
-                solved=obs.all_tests_pass,
-                steps=obs.step_count,
-                score=obs.score_so_far,
-                time_s=elapsed,
-                hints_used=obs.hints_used,
-            ))
+            summary.results.append(
+                BenchmarkResult(
+                    task_id=task.id,
+                    difficulty=task.difficulty,
+                    solved=obs.all_tests_pass,
+                    steps=obs.step_count,
+                    score=obs.score_so_far,
+                    time_s=elapsed,
+                    hints_used=obs.hints_used,
+                )
+            )
             progress.advance(task_bar)
 
     return summary
@@ -268,11 +277,11 @@ def print_summary(summary: BenchmarkSummary):
 
     # Overall table
     table = Table(title="Overall Results", show_header=True, header_style="bold magenta")
-    table.add_column("Metric",     style="cyan")
-    table.add_column("Value",      justify="right")
-    table.add_row("Tasks run",     str(len(summary.results)))
-    table.add_row("Solve rate",    f"{summary.solve_rate:.1%}")
-    table.add_row("Avg score",     f"{summary.avg_score:.3f}")
+    table.add_column("Metric", style="cyan")
+    table.add_column("Value", justify="right")
+    table.add_row("Tasks run", str(len(summary.results)))
+    table.add_row("Solve rate", f"{summary.solve_rate:.1%}")
+    table.add_row("Avg score", f"{summary.avg_score:.3f}")
     table.add_row("Avg steps (solved)", f"{summary.avg_steps:.1f}")
     console.print(table)
 
@@ -308,13 +317,13 @@ AGENTS = {
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Benchmark agents on CodeFix-Env")
-    parser.add_argument("--agent",      choices=list(AGENTS), default="random")
+    parser.add_argument("--agent", choices=list(AGENTS), default="random")
     parser.add_argument("--difficulty", choices=["all", "easy", "medium", "hard"], default="all")
-    parser.add_argument("--max-tasks",  type=int, default=999)
+    parser.add_argument("--max-tasks", type=int, default=999)
     args = parser.parse_args()
 
     agent = AGENTS[args.agent]()
-    console.print(f"[bold green]CodeFix-Env Benchmark[/bold green]")
+    console.print("[bold green]CodeFix-Env Benchmark[/bold green]")
     console.print(f"Agent: {agent.name} | Difficulty: {args.difficulty}")
     console.print(f"Total tasks: {task_count()['total']}\n")
 

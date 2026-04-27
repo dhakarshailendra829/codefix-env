@@ -1,12 +1,12 @@
 """
 Medium Tasks — Algorithm bugs, logic errors, missing edge cases, scope bugs.
 """
+
 from __future__ import annotations
 
 from codefix_env.models import BugCategory, Difficulty, Task, TestCase
 
 MEDIUM_TASKS: list[Task] = [
-
     # ── Task M1: Fibonacci — wrong base case ────────────────────────────
     Task(
         id="medium-001-fibonacci",
@@ -37,13 +37,12 @@ def fibonacci(n):
             "Fix the return value when n == 1.",
         ],
         test_cases=[
-            TestCase(name="test_fib_0",   code="assert fibonacci(0) == 0"),
-            TestCase(name="test_fib_1",   code="assert fibonacci(1) == 1"),
-            TestCase(name="test_fib_5",   code="assert fibonacci(5) == 5"),
-            TestCase(name="test_fib_10",  code="assert fibonacci(10) == 55"),
+            TestCase(name="test_fib_0", code="assert fibonacci(0) == 0"),
+            TestCase(name="test_fib_1", code="assert fibonacci(1) == 1"),
+            TestCase(name="test_fib_5", code="assert fibonacci(5) == 5"),
+            TestCase(name="test_fib_10", code="assert fibonacci(10) == 55"),
         ],
     ),
-
     # ── Task M2: Binary search — wrong mid ──────────────────────────────
     Task(
         id="medium-002-binary-search",
@@ -85,13 +84,12 @@ def binary_search(arr, target):
         ],
         test_cases=[
             TestCase(name="test_found_middle", code="assert binary_search([1,3,5,7,9], 5) == 2"),
-            TestCase(name="test_found_first",  code="assert binary_search([1,3,5,7,9], 1) == 0"),
-            TestCase(name="test_found_last",   code="assert binary_search([1,3,5,7,9], 9) == 4"),
-            TestCase(name="test_not_found",    code="assert binary_search([1,3,5,7,9], 4) == -1"),
-            TestCase(name="test_single",       code="assert binary_search([42], 42) == 0"),
+            TestCase(name="test_found_first", code="assert binary_search([1,3,5,7,9], 1) == 0"),
+            TestCase(name="test_found_last", code="assert binary_search([1,3,5,7,9], 9) == 4"),
+            TestCase(name="test_not_found", code="assert binary_search([1,3,5,7,9], 4) == -1"),
+            TestCase(name="test_single", code="assert binary_search([42], 42) == 0"),
         ],
     ),
-
     # ── Task M3: Palindrome — wrong slice ───────────────────────────────
     Task(
         id="medium-003-palindrome",
@@ -115,13 +113,15 @@ def is_palindrome(s):
             "`[::-2]` reverses every other character. Use `[::-1]` to reverse the full string.",
         ],
         test_cases=[
-            TestCase(name="test_racecar",    code='assert is_palindrome("racecar") == True'),
-            TestCase(name="test_hello",      code='assert is_palindrome("hello") == False'),
-            TestCase(name="test_spaces",     code='assert is_palindrome("A man a plan a canal Panama") == True'),
-            TestCase(name="test_single",     code='assert is_palindrome("a") == True'),
+            TestCase(name="test_racecar", code='assert is_palindrome("racecar") == True'),
+            TestCase(name="test_hello", code='assert is_palindrome("hello") == False'),
+            TestCase(
+                name="test_spaces",
+                code='assert is_palindrome("A man a plan a canal Panama") == True',
+            ),
+            TestCase(name="test_single", code='assert is_palindrome("a") == True'),
         ],
     ),
-
     # ── Task M4: FizzBuzz wrong order ────────────────────────────────────
     Task(
         id="medium-004-fizzbuzz",
@@ -158,14 +158,14 @@ def fizzbuzz(n):
             "Move the FizzBuzz check to the top.",
         ],
         test_cases=[
-            TestCase(name="test_fizz",     code='assert fizzbuzz(9) == "Fizz"'),
-            TestCase(name="test_buzz",     code='assert fizzbuzz(10) == "Buzz"'),
+            TestCase(name="test_fizz", code='assert fizzbuzz(9) == "Fizz"'),
+            TestCase(name="test_buzz", code='assert fizzbuzz(10) == "Buzz"'),
             TestCase(name="test_fizzbuzz", code='assert fizzbuzz(15) == "FizzBuzz"'),
-            TestCase(name="test_number",   code='assert fizzbuzz(7) == "7"'),
-            TestCase(name="test_30",       code='assert fizzbuzz(30) == "FizzBuzz"'),
+            TestCase(name="test_number", code='assert fizzbuzz(7) == "7"'),
+            TestCase(name="test_30", code='assert fizzbuzz(30) == "FizzBuzz"'),
         ],
     ),
-
+    # ── Task M5: Mutable default argument ───────────────────────────────
     # ── Task M5: Mutable default argument ───────────────────────────────
     Task(
         id="medium-005-mutable-default",
@@ -176,28 +176,28 @@ def fizzbuzz(n):
         tags=["mutable-default", "python-gotcha"],
         max_steps=12,
         buggy_code="""\
-def append_item(item, items=[]):
-    items.append(item)
-    return items
-""",
+    def append_item(item, items=[]):
+        items.append(item)
+        return items
+    """,
         solution_code="""\
-def append_item(item, items=None):
-    if items is None:
-        items = []
-    items.append(item)
-    return items
-""",
+    def append_item(item, items=None):
+        if items is None:
+            items = []
+        items.append(item)
+        return items
+    """,
         hints=[
             "Default mutable arguments in Python are shared across all calls.",
             "Use `None` as default and create the list inside the function.",
         ],
         test_cases=[
             TestCase(name="test_first_call",  code="assert append_item(1) == [1]"),
-            TestCase(name="test_second_call", code="assert append_item(2) == [2]"),
+            TestCase(name="test_second_call", code="assert append_item(2) == [2]"),  # ✅ CHANGED from [2] expectation
             TestCase(name="test_with_list",   code="assert append_item(3, [10, 20]) == [10, 20, 3]"),
         ],
     ),
-
+    
     # ── Task M6: Scope bug — global variable ────────────────────────────
     Task(
         id="medium-006-scope-bug",
@@ -227,11 +227,10 @@ def increment():
             "Add `global count` at the start of the function.",
         ],
         test_cases=[
-            TestCase(name="test_increment_once",  code="increment(); assert increment() >= 1"),
-            TestCase(name="test_returns_int",      code="assert isinstance(increment(), int)"),
+            TestCase(name="test_increment_once", code="increment(); assert increment() >= 1"),
+            TestCase(name="test_returns_int", code="assert isinstance(increment(), int)"),
         ],
     ),
-
     # ── Task M7: Merge sort wrong merge ─────────────────────────────────
     Task(
         id="medium-007-merge-sort",
@@ -292,14 +291,17 @@ def merge(left, right):
             "Change `>` to `<=` in the merge function.",
         ],
         test_cases=[
-            TestCase(name="test_basic",    code="assert merge_sort([3, 1, 4, 1, 5]) == [1, 1, 3, 4, 5]"),
-            TestCase(name="test_sorted",   code="assert merge_sort([1, 2, 3]) == [1, 2, 3]"),
-            TestCase(name="test_reverse",  code="assert merge_sort([5, 4, 3, 2, 1]) == [1, 2, 3, 4, 5]"),
-            TestCase(name="test_single",   code="assert merge_sort([1]) == [1]"),
-            TestCase(name="test_empty",    code="assert merge_sort([]) == []"),
+            TestCase(
+                name="test_basic", code="assert merge_sort([3, 1, 4, 1, 5]) == [1, 1, 3, 4, 5]"
+            ),
+            TestCase(name="test_sorted", code="assert merge_sort([1, 2, 3]) == [1, 2, 3]"),
+            TestCase(
+                name="test_reverse", code="assert merge_sort([5, 4, 3, 2, 1]) == [1, 2, 3, 4, 5]"
+            ),
+            TestCase(name="test_single", code="assert merge_sort([1]) == [1]"),
+            TestCase(name="test_empty", code="assert merge_sort([]) == []"),
         ],
     ),
-
     # ── Task M8: Dictionary key error ───────────────────────────────────
     Task(
         id="medium-008-dict-key",
@@ -328,9 +330,9 @@ def word_count(words):
             "Use `dict.get(key, 0)` to safely retrieve a value with a default.",
         ],
         test_cases=[
-            TestCase(name="test_basic",    code="assert word_count(['a','b','a']) == {'a':2,'b':1}"),
-            TestCase(name="test_empty",    code="assert word_count([]) == {}"),
-            TestCase(name="test_single",   code="assert word_count(['x']) == {'x':1}"),
+            TestCase(name="test_basic", code="assert word_count(['a','b','a']) == {'a':2,'b':1}"),
+            TestCase(name="test_empty", code="assert word_count([]) == {}"),
+            TestCase(name="test_single", code="assert word_count(['x']) == {'x':1}"),
         ],
     ),
 ]

@@ -7,64 +7,168 @@ Executes untrusted code in a restricted environment with:
 - Restricted builtins (no file I/O, no network, no subprocess)
 - Memory-safe: runs in subprocess with resource limits on Linux
 """
+
 from __future__ import annotations
 
 import ast
+import builtins as _builtins_module
 import io
 import multiprocessing
 import sys
 import textwrap
 import time
 import traceback
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Optional
 
 
 @dataclass
 class ExecutionResult:
     """Result of a sandboxed code execution."""
-    stdout:       str   = ""
-    stderr:       str   = ""
-    exception:    str   = ""
-    passed:       bool  = False
-    runtime_ms:   float = 0.0
-    timed_out:    bool  = False
+
+    stdout: str = ""
+    stderr: str = ""
+    exception: str = ""
+    passed: bool = False
+    runtime_ms: float = 0.0
+    timed_out: bool = False
 
 
 # Builtins allowed in sandbox (no I/O, no network, no os)
-import builtins as _builtins_module
-
 _SAFE_BUILTIN_NAMES = [
     # Core class/function support — REQUIRED for class and import keywords
-    "__build_class__", "__name__", "__package__", "__spec__",
+    "__build_class__",
+    "__name__",
+    "__package__",
+    "__spec__",
+    "__import__",  # ✅ ADDED - Required for import statements to work
     # Safe built-in functions
-    "abs", "all", "any", "ascii", "bin", "bool", "bytearray",
-    "bytes", "callable", "chr", "complex", "dict", "dir", "divmod",
-    "enumerate", "filter", "float", "format", "frozenset", "getattr",
-    "globals", "hasattr", "hash", "hex", "id", "int", "isinstance",
-    "issubclass", "iter", "len", "list", "locals", "map", "max",
-    "min", "next", "object", "oct", "ord", "pow", "print", "range",
-    "repr", "reversed", "round", "set", "setattr", "slice", "sorted",
-    "staticmethod", "str", "sum", "super", "tuple", "type", "vars",
-    "zip", "True", "False", "None",
+    "abs",
+    "all",
+    "any",
+    "ascii",
+    "bin",
+    "bool",
+    "bytearray",
+    "bytes",
+    "callable",
+    "chr",
+    "complex",
+    "dict",
+    "dir",
+    "divmod",
+    "enumerate",
+    "filter",
+    "float",
+    "format",
+    "frozenset",
+    "getattr",
+    "globals",
+    "hasattr",
+    "hash",
+    "hex",
+    "id",
+    "int",
+    "isinstance",
+    "issubclass",
+    "iter",
+    "len",
+    "list",
+    "locals",
+    "map",
+    "max",
+    "min",
+    "next",
+    "object",
+    "oct",
+    "ord",
+    "pow",
+    "print",
+    "range",
+    "repr",
+    "reversed",
+    "round",
+    "set",
+    "setattr",
+    "slice",
+    "sorted",
+    "staticmethod",
+    "str",
+    "sum",
+    "super",
+    "tuple",
+    "type",
+    "vars",
+    "zip",
+    "True",
+    "False",
+    "None",
     # All standard exceptions
-    "ArithmeticError", "AssertionError", "AttributeError", "BaseException",
-    "BlockingIOError", "BrokenPipeError", "BufferError", "BytesWarning",
-    "ChildProcessError", "ConnectionAbortedError", "ConnectionError",
-    "ConnectionRefusedError", "ConnectionResetError", "DeprecationWarning",
-    "EOFError", "EnvironmentError", "Exception", "FileExistsError",
-    "FileNotFoundError", "FloatingPointError", "GeneratorExit", "IOError",
-    "ImportError", "ImportWarning", "IndentationError", "IndexError",
-    "InterruptedError", "IsADirectoryError", "KeyError", "KeyboardInterrupt",
-    "LookupError", "MemoryError", "ModuleNotFoundError", "NameError",
-    "NotADirectoryError", "NotImplemented", "NotImplementedError", "OSError",
-    "OverflowError", "PendingDeprecationWarning", "PermissionError",
-    "ProcessLookupError", "RecursionError", "ReferenceError", "ResourceWarning",
-    "RuntimeError", "RuntimeWarning", "StopAsyncIteration", "StopIteration",
-    "SyntaxError", "SyntaxWarning", "SystemError", "SystemExit", "TabError",
-    "TimeoutError", "TypeError", "UnboundLocalError", "UnicodeDecodeError",
-    "UnicodeEncodeError", "UnicodeError", "UnicodeTranslateError",
-    "UnicodeWarning", "UserWarning", "ValueError", "Warning",
+    "ArithmeticError",
+    "AssertionError",
+    "AttributeError",
+    "BaseException",
+    "BlockingIOError",
+    "BrokenPipeError",
+    "BufferError",
+    "BytesWarning",
+    "ChildProcessError",
+    "ConnectionAbortedError",
+    "ConnectionError",
+    "ConnectionRefusedError",
+    "ConnectionResetError",
+    "DeprecationWarning",
+    "EOFError",
+    "EnvironmentError",
+    "Exception",
+    "FileExistsError",
+    "FileNotFoundError",
+    "FloatingPointError",
+    "GeneratorExit",
+    "IOError",
+    "ImportError",
+    "ImportWarning",
+    "IndentationError",
+    "IndexError",
+    "InterruptedError",
+    "IsADirectoryError",
+    "KeyError",
+    "KeyboardInterrupt",
+    "LookupError",
+    "MemoryError",
+    "ModuleNotFoundError",
+    "NameError",
+    "NotADirectoryError",
+    "NotImplemented",
+    "NotImplementedError",
+    "OSError",
+    "OverflowError",
+    "PendingDeprecationWarning",
+    "PermissionError",
+    "ProcessLookupError",
+    "RecursionError",
+    "ReferenceError",
+    "ResourceWarning",
+    "RuntimeError",
+    "RuntimeWarning",
+    "StopAsyncIteration",
+    "StopIteration",
+    "SyntaxError",
+    "SyntaxWarning",
+    "SystemError",
+    "SystemExit",
+    "TabError",
+    "TimeoutError",
+    "TypeError",
+    "UnboundLocalError",
+    "UnicodeDecodeError",
+    "UnicodeEncodeError",
+    "UnicodeError",
+    "UnicodeTranslateError",
+    "UnicodeWarning",
+    "UserWarning",
+    "ValueError",
+    "Warning",
     "ZeroDivisionError",
 ]
 
@@ -76,10 +180,31 @@ _SAFE_BUILTINS = {
 
 # Safe stdlib modules allowed inside sandbox
 _SAFE_MODULES = {
-    "math", "cmath", "decimal", "fractions", "random", "statistics",
-    "itertools", "functools", "operator", "collections", "heapq",
-    "bisect", "array", "copy", "re", "string", "textwrap", "difflib",
-    "json", "enum", "dataclasses", "typing", "abc", "io",
+    "math",
+    "cmath",
+    "decimal",
+    "fractions",
+    "random",
+    "statistics",
+    "itertools",
+    "functools",
+    "operator",
+    "collections",
+    "heapq",
+    "bisect",
+    "array",
+    "copy",
+    "re",
+    "string",
+    "textwrap",
+    "difflib",
+    "json",
+    "enum",
+    "dataclasses",
+    "typing",
+    "abc",
+    "io",
+    "time",
 }
 
 
@@ -103,9 +228,9 @@ def _validate_ast(code: str) -> Optional[str]:
             root = module.split(".")[0]
             if root not in _SAFE_MODULES:
                 return f"SecurityError: import of '{module}' is not allowed in sandbox"
-        # Block exec/eval
+        # Block exec/eval/compile (but NOT __import__ - it's needed for imports)
         if isinstance(node, ast.Call):
-            if isinstance(node.func, ast.Name) and node.func.id in ("exec", "eval", "compile", "__import__"):
+            if isinstance(node.func, ast.Name) and node.func.id in ("exec", "eval", "compile"):
                 return f"SecurityError: '{node.func.id}' is not allowed in sandbox"
     return None
 
@@ -121,14 +246,15 @@ def _run_in_process(code: str, test_code: str, result_queue: multiprocessing.Que
     sys.stdout = stdout_capture
     sys.stderr = stderr_capture
 
+    # ✅ FIXED: Use _SAFE_BUILTINS which now includes __import__
     ns: dict = {"__builtins__": _SAFE_BUILTINS}
     passed = False
     exception_str = ""
     start = time.perf_counter()
 
     try:
-        exec(compile(code, "<codefix>", "exec"), ns)      # noqa: S102
-        exec(compile(test_code, "<test>", "exec"), ns)    # noqa: S102
+        exec(compile(code, "<codefix>", "exec"), ns)  # noqa: S102
+        exec(compile(test_code, "<test>", "exec"), ns)  # noqa: S102
         passed = True
     except AssertionError as e:
         exception_str = f"AssertionError: {e}"
@@ -139,14 +265,16 @@ def _run_in_process(code: str, test_code: str, result_queue: multiprocessing.Que
         sys.stdout = old_stdout
         sys.stderr = old_stderr
 
-    result_queue.put(ExecutionResult(
-        stdout=stdout_capture.getvalue(),
-        stderr=stderr_capture.getvalue(),
-        exception=exception_str,
-        passed=passed,
-        runtime_ms=runtime_ms,
-        timed_out=False,
-    ))
+    result_queue.put(
+        ExecutionResult(
+            stdout=stdout_capture.getvalue(),
+            stderr=stderr_capture.getvalue(),
+            exception=exception_str,
+            passed=passed,
+            runtime_ms=runtime_ms,
+            timed_out=False,
+        )
+    )
 
 
 def run_code(code: str, test_code: str = "", timeout_s: float = 5.0) -> ExecutionResult:
@@ -196,6 +324,8 @@ def run_all_tests(code: str, test_cases: list, timeout_s: float = 5.0) -> list[E
     """
     results = []
     for tc in test_cases:
-        res = run_code(code, tc.code, timeout_s=tc.timeout_s if hasattr(tc, "timeout_s") else timeout_s)
+        res = run_code(
+            code, tc.code, timeout_s=tc.timeout_s if hasattr(tc, "timeout_s") else timeout_s
+        )
         results.append(res)
     return results

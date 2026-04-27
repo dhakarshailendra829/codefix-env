@@ -1,6 +1,7 @@
 """
 Tests for task registry, task loading, and sandbox execution.
 """
+
 from __future__ import annotations
 
 import pytest
@@ -9,19 +10,18 @@ from codefix_env.models import Difficulty, Task
 from codefix_env.tasks import ALL_TASKS, list_tasks, load_task, random_task, task_count
 from codefix_env.tasks.easy import EASY_TASKS
 from codefix_env.tasks.medium import MEDIUM_TASKS
-from codefix_env.tasks.hard import HARD_TASKS
-from codefix_env.utils.sandbox import ExecutionResult, run_code, run_all_tests
-
+from codefix_env.utils.sandbox import run_all_tests, run_code
 
 # ── Task Registry ─────────────────────────────────────────────────────────────
+
 
 class TestTaskRegistry:
     def test_all_tasks_loaded(self):
         counts = task_count()
         assert counts["total"] >= 20
-        assert counts["easy"]   >= 8
+        assert counts["easy"] >= 8
         assert counts["medium"] >= 8
-        assert counts["hard"]   >= 5
+        assert counts["hard"] >= 5
 
     def test_load_known_task(self):
         task = load_task("easy-001-missing-return")
@@ -71,6 +71,7 @@ class TestTaskRegistry:
 
 # ── Task Structure Validation ─────────────────────────────────────────────────
 
+
 class TestTaskStructure:
     @pytest.mark.parametrize("task", list(ALL_TASKS.values()))
     def test_task_has_required_fields(self, task: Task):
@@ -94,11 +95,13 @@ class TestTaskStructure:
 
     @pytest.mark.parametrize("task", list(ALL_TASKS.values()))
     def test_buggy_and_solution_differ(self, task: Task):
-        assert task.buggy_code != task.solution_code, \
-            f"{task.id}: buggy_code and solution_code are identical!"
+        assert (
+            task.buggy_code != task.solution_code
+        ), f"{task.id}: buggy_code and solution_code are identical!"
 
 
 # ── Solution Correctness ──────────────────────────────────────────────────────
+
 
 class TestSolutionCorrectness:
     """Every task's solution code must pass all its own test cases."""
@@ -111,9 +114,8 @@ class TestSolutionCorrectness:
             for i, r in enumerate(results)
             if not r.passed
         ]
-        assert not failed, (
-            f"Task '{task.id}' solution fails tests:\n"
-            + "\n".join(f"  {name}: {err}" for name, err in failed)
+        assert not failed, f"Task '{task.id}' solution fails tests:\n" + "\n".join(
+            f"  {name}: {err}" for name, err in failed
         )
 
     @pytest.mark.parametrize("task", EASY_TASKS + MEDIUM_TASKS)
@@ -121,12 +123,13 @@ class TestSolutionCorrectness:
         """Sanity check: buggy code should fail at least one test."""
         results = run_all_tests(task.buggy_code, task.test_cases)
         all_pass = all(r.passed for r in results)
-        assert not all_pass, (
-            f"Task '{task.id}': buggy code passes ALL tests — this task has no bug!"
-        )
+        assert (
+            not all_pass
+        ), f"Task '{task.id}': buggy code passes ALL tests — this task has no bug!"
 
 
 # ── Sandbox ───────────────────────────────────────────────────────────────────
+
 
 class TestSandbox:
     def test_correct_code_passes(self):
@@ -186,6 +189,7 @@ class TestSandbox:
 
     def test_run_all_tests(self):
         from codefix_env.models import TestCase
+
         code = "def add(a, b): return a + b"
         tests = [
             TestCase(name="t1", code="assert add(1,2)==3"),

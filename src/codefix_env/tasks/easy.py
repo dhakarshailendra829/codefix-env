@@ -2,12 +2,12 @@
 Easy Tasks — Syntax errors, simple fixes, missing colons, wrong indentation.
 Each task has 3+ test cases and a clear hint.
 """
+
 from __future__ import annotations
 
 from codefix_env.models import BugCategory, Difficulty, Task, TestCase
 
 EASY_TASKS: list[Task] = [
-
     # ── Task E1: Missing return ──────────────────────────────────────────
     Task(
         id="easy-001-missing-return",
@@ -31,13 +31,12 @@ def add_numbers(a, b):
             "You need a `return` statement at the end of the function.",
         ],
         test_cases=[
-            TestCase(name="test_positive",  code="assert add_numbers(2, 3) == 5"),
-            TestCase(name="test_negative",  code="assert add_numbers(-1, -4) == -5"),
-            TestCase(name="test_zero",      code="assert add_numbers(0, 0) == 0"),
-            TestCase(name="test_float",     code="assert add_numbers(1.5, 2.5) == 4.0"),
+            TestCase(name="test_positive", code="assert add_numbers(2, 3) == 5"),
+            TestCase(name="test_negative", code="assert add_numbers(-1, -4) == -5"),
+            TestCase(name="test_zero", code="assert add_numbers(0, 0) == 0"),
+            TestCase(name="test_float", code="assert add_numbers(1.5, 2.5) == 4.0"),
         ],
     ),
-
     # ── Task E2: Wrong comparison operator ──────────────────────────────
     Task(
         id="easy-002-wrong-operator",
@@ -60,13 +59,12 @@ def is_even(n):
             "Look at the return expression carefully — one character is wrong.",
         ],
         test_cases=[
-            TestCase(name="test_even_2",  code="assert is_even(2) == True"),
-            TestCase(name="test_odd_3",   code="assert is_even(3) == False"),
-            TestCase(name="test_zero",    code="assert is_even(0) == True"),
-            TestCase(name="test_neg",     code="assert is_even(-4) == True"),
+            TestCase(name="test_even_2", code="assert is_even(2) == True"),
+            TestCase(name="test_odd_3", code="assert is_even(3) == False"),
+            TestCase(name="test_zero", code="assert is_even(0) == True"),
+            TestCase(name="test_neg", code="assert is_even(-4) == True"),
         ],
     ),
-
     # ── Task E3: Off-by-one in range ─────────────────────────────────────
     Task(
         id="easy-003-off-by-one-range",
@@ -95,13 +93,12 @@ def sum_to_n(n):
             "Change `range(1, n)` to include n itself.",
         ],
         test_cases=[
-            TestCase(name="test_sum_5",  code="assert sum_to_n(5) == 15"),
+            TestCase(name="test_sum_5", code="assert sum_to_n(5) == 15"),
             TestCase(name="test_sum_10", code="assert sum_to_n(10) == 55"),
-            TestCase(name="test_sum_1",  code="assert sum_to_n(1) == 1"),
-            TestCase(name="test_sum_0",  code="assert sum_to_n(0) == 0"),
+            TestCase(name="test_sum_1", code="assert sum_to_n(1) == 1"),
+            TestCase(name="test_sum_0", code="assert sum_to_n(0) == 0"),
         ],
     ),
-
     # ── Task E4: Wrong indentation ───────────────────────────────────────
     Task(
         id="easy-004-wrong-indent",
@@ -132,13 +129,12 @@ def find_max(numbers):
             "De-indent `return max_val` by one level so it runs after the loop finishes.",
         ],
         test_cases=[
-            TestCase(name="test_basic",    code="assert find_max([3, 1, 4, 1, 5, 9]) == 9"),
-            TestCase(name="test_sorted",   code="assert find_max([1, 2, 3, 4, 5]) == 5"),
-            TestCase(name="test_single",   code="assert find_max([42]) == 42"),
+            TestCase(name="test_basic", code="assert find_max([3, 1, 4, 1, 5, 9]) == 9"),
+            TestCase(name="test_sorted", code="assert find_max([1, 2, 3, 4, 5]) == 5"),
+            TestCase(name="test_single", code="assert find_max([42]) == 42"),
             TestCase(name="test_negative", code="assert find_max([-5, -1, -3]) == -1"),
         ],
     ),
-
     # ── Task E5: Missing colon ───────────────────────────────────────────
     Task(
         id="easy-005-missing-colon",
@@ -160,11 +156,10 @@ def greet(name):
             "Every `def` statement must end with a colon `:`.",
         ],
         test_cases=[
-            TestCase(name="test_hello",   code='assert greet("Alice") == "Hello, Alice!"'),
-            TestCase(name="test_empty",   code='assert greet("") == "Hello, !"'),
+            TestCase(name="test_hello", code='assert greet("Alice") == "Hello, Alice!"'),
+            TestCase(name="test_empty", code='assert greet("") == "Hello, !"'),
         ],
     ),
-
     # ── Task E6: String not converted to int ────────────────────────────
     Task(
         id="easy-006-type-mismatch",
@@ -187,12 +182,11 @@ def add_age(base_age, years_str):
             "Use `int(years_str)` to convert.",
         ],
         test_cases=[
-            TestCase(name="test_basic",    code='assert add_age(25, "5") == 30'),
-            TestCase(name="test_zero",     code='assert add_age(30, "0") == 30'),
-            TestCase(name="test_large",    code='assert add_age(0, "100") == 100'),
+            TestCase(name="test_basic", code='assert add_age(25, "5") == 30'),
+            TestCase(name="test_zero", code='assert add_age(30, "0") == 30'),
+            TestCase(name="test_large", code='assert add_age(0, "100") == 100'),
         ],
     ),
-
     # ── Task E7: Wrong list index ────────────────────────────────────────
     Task(
         id="easy-007-wrong-index",
@@ -214,12 +208,11 @@ def get_last(items):
             "Python index -1 refers to the last element of a list.",
         ],
         test_cases=[
-            TestCase(name="test_basic",    code="assert get_last([1, 2, 3]) == 3"),
-            TestCase(name="test_single",   code="assert get_last(['x']) == 'x'"),
-            TestCase(name="test_strings",  code="assert get_last(['a', 'b', 'c']) == 'c'"),
+            TestCase(name="test_basic", code="assert get_last([1, 2, 3]) == 3"),
+            TestCase(name="test_single", code="assert get_last(['x']) == 'x'"),
+            TestCase(name="test_strings", code="assert get_last(['a', 'b', 'c']) == 'c'"),
         ],
     ),
-
     # ── Task E8: Boolean logic inverted ─────────────────────────────────
     Task(
         id="easy-008-inverted-bool",
@@ -242,10 +235,10 @@ def is_adult(age):
             "Change `<` to `>=`.",
         ],
         test_cases=[
-            TestCase(name="test_adult",    code="assert is_adult(18) == True"),
-            TestCase(name="test_child",    code="assert is_adult(10) == False"),
-            TestCase(name="test_exactly",  code="assert is_adult(17) == False"),
-            TestCase(name="test_old",      code="assert is_adult(65) == True"),
+            TestCase(name="test_adult", code="assert is_adult(18) == True"),
+            TestCase(name="test_child", code="assert is_adult(10) == False"),
+            TestCase(name="test_exactly", code="assert is_adult(17) == False"),
+            TestCase(name="test_old", code="assert is_adult(65) == True"),
         ],
     ),
 ]

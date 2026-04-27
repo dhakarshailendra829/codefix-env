@@ -18,7 +18,7 @@ Quick start::
 """
 
 __version__ = "0.2.0"
-__author__  = "Shailendra Dhakar"
+__author__ = "Shailendra Dhakar"
 
 from codefix_env.client import CodeFixClient, SyncCodeFixClient
 from codefix_env.env import CodeFixEnvironment
@@ -35,8 +35,8 @@ from codefix_env.models import (
     TestResult,
 )
 from codefix_env.rewards import RewardPipeline
-from codefix_env.tasks import load_task, random_task, list_tasks, task_count
-from codefix_env.utils.metrics import ScoringConfig, RewardMLP, EpisodeMetrics
+from codefix_env.tasks import list_tasks, load_task, random_task, task_count
+from codefix_env.utils.metrics import EpisodeMetrics, RewardMLP, ScoringConfig
 
 __all__ = [
     # Core

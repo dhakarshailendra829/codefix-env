@@ -11,20 +11,18 @@ Features:
 - Hint system with penalty
 - Episode state management
 """
+
 from __future__ import annotations
 
 import difflib
-import logging
 import uuid
 from copy import deepcopy
-from datetime import datetime
 from typing import Optional
 
 import structlog
 
 from codefix_env.models import (
     ActionType,
-    BugCategory,
     CodeFixAction,
     CodeFixObservation,
     CodeFixState,
@@ -58,27 +56,27 @@ class CodeFixEnvironment:
     def __init__(
         self,
         reward_pipeline: RewardPipeline = default_pipeline,
-        default_difficulty: Difficulty  = Difficulty.MEDIUM,
-        max_steps: int                  = 20,
+        default_difficulty: Difficulty = Difficulty.MEDIUM,
+        max_steps: int = 20,
     ):
-        self.reward_pipeline    = reward_pipeline
+        self.reward_pipeline = reward_pipeline
         self.default_difficulty = default_difficulty
-        self.default_max_steps  = max_steps
+        self.default_max_steps = max_steps
 
         # Episode state (initialised on reset)
-        self._task:    Optional[Task]              = None
-        self._state:   Optional[CodeFixState]      = None
-        self._obs:     Optional[CodeFixObservation]= None
-        self._current_code: str                    = ""
+        self._task: Optional[Task] = None
+        self._state: Optional[CodeFixState] = None
+        self._obs: Optional[CodeFixObservation] = None
+        self._current_code: str = ""
         self._prev_obs: Optional[CodeFixObservation] = None
 
     # ── Public API ────────────────────────────────────────────────────────────
 
     def reset(
         self,
-        task_id:    Optional[str]        = None,
+        task_id: Optional[str] = None,
         difficulty: Optional[Difficulty] = None,
-        seed:       Optional[int]        = None,
+        seed: Optional[int] = None,
     ) -> CodeFixObservation:
         """
         Start a new episode.
@@ -93,6 +91,7 @@ class CodeFixEnvironment:
         """
         if seed is not None:
             import random
+
             random.seed(seed)
 
         # Load task
@@ -140,7 +139,9 @@ class CodeFixEnvironment:
             raise RuntimeError("Call reset() before step().")
         # Allow GET_HINT even on a done episode (graceful feedback, no crash)
         # use_enum_values=True means action_type is stored as plain string not enum member
-        action_type_str = action.action_type if isinstance(action.action_type, str) else action.action_type.value
+        action_type_str = (
+            action.action_type if isinstance(action.action_type, str) else action.action_type.value
+        )
         if self._state.done and action_type_str != ActionType.GET_HINT.value:
             raise RuntimeError("Episode is done. Call reset() to start a new episode.")
 
@@ -162,12 +163,14 @@ class CodeFixEnvironment:
             immediate_reward = -0.05
 
         # Record in state
-        self._state.action_history.append({
-            "step": self._state.step_count,
-            "action_type": action_type.value,
-            "line_number": action.line_number,
-            "reward": immediate_reward,
-        })
+        self._state.action_history.append(
+            {
+                "step": self._state.step_count,
+                "action_type": action_type.value,
+                "line_number": action.line_number,
+                "reward": immediate_reward,
+            }
+        )
         self._state.total_reward += immediate_reward
 
         # Update obs ref
@@ -176,11 +179,13 @@ class CodeFixEnvironment:
         # Check terminal conditions
         done, truncated, reason = self._check_terminal(obs)
         if done or truncated:
-            self._state.done   = True
+            self._state.done = True
             self._state.solved = obs.all_tests_pass
             final_score = compute_final_score(
-                obs.tests_passed, obs.tests_total,
-                self._state.step_count, self._state.hints_used,
+                obs.tests_passed,
+                obs.tests_total,
+                self._state.step_count,
+                self._state.hints_used,
                 self.reward_pipeline.cfg,
             )
             obs.score_so_far = final_score
@@ -239,13 +244,16 @@ class CodeFixEnvironment:
             return self._action_view_code()
 
         else:
-            return self._build_observation(
-                tests_run=False,
-                test_results=[],
-                shaped_reward=0.0,
-                feedback=f"Unknown action: {action_type}",
-                error_message="UnknownAction",
-            ), -0.02
+            return (
+                self._build_observation(
+                    tests_run=False,
+                    test_results=[],
+                    shaped_reward=0.0,
+                    feedback=f"Unknown action: {action_type}",
+                    error_message="UnknownAction",
+                ),
+                -0.02,
+            )
 
     def _action_run_tests(self) -> tuple[CodeFixObservation, float]:
         results = run_all_tests(self._current_code, self._task.test_cases)
@@ -263,11 +271,14 @@ class CodeFixEnvironment:
         obs.shaped_reward = reward
         return obs, reward
 
-    def _action_edit_line(self, line_num: int, new_content: str) -> tuple[CodeFixObservation, float]:
+    def _action_edit_line(
+        self, line_num: int, new_content: str
+    ) -> tuple[CodeFixObservation, float]:
         lines = self._current_code.splitlines(keepends=True)
         if line_num < 1 or line_num > len(lines):
             obs = self._build_observation(
-                tests_run=False, test_results=[],
+                tests_run=False,
+                test_results=[],
                 shaped_reward=-0.02,
                 feedback=f"Invalid line number {line_num}. Code has {len(lines)} lines.",
                 error_message="InvalidLineNumber",
@@ -280,7 +291,8 @@ class CodeFixEnvironment:
         self._current_code = "".join(lines)
 
         obs = self._build_observation(
-            tests_run=False, test_results=[],
+            tests_run=False,
+            test_results=[],
             shaped_reward=0.0,
             feedback=f"Line {line_num} edited.",
         )
@@ -290,15 +302,18 @@ class CodeFixEnvironment:
         obs.shaped_reward = reward
         return obs, reward
 
-    def _action_insert_line(self, after_line: int, content: str) -> tuple[CodeFixObservation, float]:
+    def _action_insert_line(
+        self, after_line: int, content: str
+    ) -> tuple[CodeFixObservation, float]:
         lines = self._current_code.splitlines(keepends=True)
-        idx   = min(after_line, len(lines))
+        idx = min(after_line, len(lines))
         if not content.endswith("\n"):
             content += "\n"
         lines.insert(idx, content)
         self._current_code = "".join(lines)
         obs = self._build_observation(
-            tests_run=False, test_results=[],
+            tests_run=False,
+            test_results=[],
             shaped_reward=0.0,
             feedback=f"Line inserted after line {after_line}.",
         )
@@ -312,14 +327,19 @@ class CodeFixEnvironment:
         lines = self._current_code.splitlines(keepends=True)
         if line_num < 1 or line_num > len(lines):
             obs = self._build_observation(
-                tests_run=False, test_results=[], shaped_reward=-0.02,
-                feedback=f"Invalid line number {line_num}.", error_message="InvalidLineNumber",
+                tests_run=False,
+                test_results=[],
+                shaped_reward=-0.02,
+                feedback=f"Invalid line number {line_num}.",
+                error_message="InvalidLineNumber",
             )
             return obs, -0.02
         del lines[line_num - 1]
         self._current_code = "".join(lines)
         obs = self._build_observation(
-            tests_run=False, test_results=[], shaped_reward=0.0,
+            tests_run=False,
+            test_results=[],
+            shaped_reward=0.0,
             feedback=f"Line {line_num} deleted.",
         )
         reward = self.reward_pipeline.step_reward(
@@ -341,7 +361,10 @@ class CodeFixEnvironment:
 
         penalty = -self._task.hint_penalty if hints_used < len(hints) else 0.0
         obs = self._build_observation(
-            tests_run=False, test_results=[], shaped_reward=penalty, feedback=feedback,
+            tests_run=False,
+            test_results=[],
+            shaped_reward=penalty,
+            feedback=feedback,
         )
         return obs, penalty
 
@@ -352,7 +375,9 @@ class CodeFixEnvironment:
         passed = sum(1 for r in test_results if r.passed)
 
         obs = self._build_observation(
-            tests_run=True, test_results=test_results, shaped_reward=0.0,
+            tests_run=True,
+            test_results=test_results,
+            shaped_reward=0.0,
             feedback=(
                 f"✅ Submitted! {passed}/{len(test_results)} tests passing."
                 if passed == len(test_results)
@@ -364,13 +389,15 @@ class CodeFixEnvironment:
 
         reward = self.reward_pipeline.episode_reward(obs, self._task)
         obs.shaped_reward = reward
-        obs.score_so_far  = reward
-        self._state.done  = True
+        obs.score_so_far = reward
+        self._state.done = True
         return obs, reward
 
     def _action_view_code(self) -> tuple[CodeFixObservation, float]:
         obs = self._build_observation(
-            tests_run=False, test_results=[], shaped_reward=0.0,
+            tests_run=False,
+            test_results=[],
+            shaped_reward=0.0,
             feedback="Code viewed.",
         )
         return obs, 0.0
@@ -379,41 +406,51 @@ class CodeFixEnvironment:
 
     def _build_observation(
         self,
-        tests_run:    bool,
+        tests_run: bool,
         test_results: list[TestResult],
         shaped_reward: float,
-        feedback:     str = "",
+        feedback: str = "",
         error_message: str = "",
     ) -> CodeFixObservation:
         """Construct a full CodeFixObservation from current state."""
         assert self._task and self._state
 
-        passed      = sum(1 for r in test_results if r.passed) if tests_run else (
-            self._obs.tests_passed if self._obs else 0
+        passed = (
+            sum(1 for r in test_results if r.passed)
+            if tests_run
+            else (self._obs.tests_passed if self._obs else 0)
         )
-        total       = len(self._task.test_cases)
-        all_pass    = (passed == total and tests_run)
-        score       = compute_test_score(passed, total) if tests_run else (
-            self._obs.score_so_far if self._obs else 0.0
+        total = len(self._task.test_cases)
+        all_pass = passed == total and tests_run
+        score = (
+            compute_test_score(passed, total)
+            if tests_run
+            else (self._obs.score_so_far if self._obs else 0.0)
         )
 
         # Build unified diff
-        diff = "".join(difflib.unified_diff(
-            self._task.buggy_code.splitlines(keepends=True),
-            self._current_code.splitlines(keepends=True),
-            fromfile="original.py",
-            tofile="current.py",
-        ))
+        diff = "".join(
+            difflib.unified_diff(
+                self._task.buggy_code.splitlines(keepends=True),
+                self._current_code.splitlines(keepends=True),
+                fromfile="original.py",
+                tofile="current.py",
+            )
+        )
 
         return CodeFixObservation(
             current_code=self._current_code,
             original_code=self._task.buggy_code,
             diff=diff,
             test_results=test_results,
-            test_output="\n".join(
-                f"[{'✓' if r.passed else '✗'}] {r.name}: {r.output or r.error}"
-                for r in test_results
-            ) if test_results else "",
+            test_output=(
+                "\n".join(
+                    f"[{'✓' if r.passed else '✗'}] {r.name}: {r.output or r.error}"
+                    for r in test_results
+                )
+                if test_results
+                else ""
+            ),
             tests_passed=passed,
             tests_total=total,
             all_tests_pass=all_pass,
@@ -443,13 +480,15 @@ class CodeFixEnvironment:
                     passed=False,
                     exception=f"InternalError: expected ExecutionResult, got {type(er).__name__}",
                 )
-            results.append(TestResult(
-                name=tc.name,
-                passed=er.passed,
-                output=er.stdout[:500] if er.stdout else "",
-                error=(er.exception or er.stderr)[:500],
-                runtime_ms=er.runtime_ms,
-            ))
+            results.append(
+                TestResult(
+                    name=tc.name,
+                    passed=er.passed,
+                    output=er.stdout[:500] if er.stdout else "",
+                    error=(er.exception or er.stderr)[:500],
+                    runtime_ms=er.runtime_ms,
+                )
+            )
         return results
 
     def _check_terminal(

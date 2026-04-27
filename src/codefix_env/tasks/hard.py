@@ -2,12 +2,12 @@
 Hard Tasks — Multi-function bugs, complex algorithms, subtle logic errors.
 These tasks require understanding interactions between multiple functions.
 """
+
 from __future__ import annotations
 
 from codefix_env.models import BugCategory, Difficulty, Task, TestCase
 
 HARD_TASKS: list[Task] = [
-
     # ── Task H1: LRU Cache — wrong eviction ─────────────────────────────
     Task(
         id="hard-001-lru-cache",
@@ -69,15 +69,18 @@ class LRUCache:
             "Both `get` and `put` have bugs. Fix them independently.",
         ],
         test_cases=[
-            TestCase(name="test_basic_put_get",
-                     code="""\
+            TestCase(
+                name="test_basic_put_get",
+                code="""\
 cache = LRUCache(2)
 cache.put(1, 1)
 cache.put(2, 2)
 assert cache.get(1) == 1
-"""),
-            TestCase(name="test_eviction",
-                     code="""\
+""",
+            ),
+            TestCase(
+                name="test_eviction",
+                code="""\
 cache = LRUCache(2)
 cache.put(1, 1)
 cache.put(2, 2)
@@ -85,23 +88,27 @@ cache.get(1)       # 1 is now MRU
 cache.put(3, 3)    # evicts 2 (LRU)
 assert cache.get(2) == -1
 assert cache.get(3) == 3
-"""),
-            TestCase(name="test_update_existing",
-                     code="""\
+""",
+            ),
+            TestCase(
+                name="test_update_existing",
+                code="""\
 cache = LRUCache(2)
 cache.put(1, 1)
 cache.put(2, 2)
 cache.put(1, 10)   # update key 1
 assert cache.get(1) == 10
-"""),
-            TestCase(name="test_miss",
-                     code="""\
+""",
+            ),
+            TestCase(
+                name="test_miss",
+                code="""\
 cache = LRUCache(1)
 assert cache.get(99) == -1
-"""),
+""",
+            ),
         ],
     ),
-
     # ── Task H2: Graph BFS — wrong visited tracking ─────────────────────
     Task(
         id="hard-002-graph-bfs",
@@ -151,27 +158,32 @@ def bfs(graph, start):
             "Initialise `visited` with the start node.",
         ],
         test_cases=[
-            TestCase(name="test_linear",
-                     code="""\
+            TestCase(
+                name="test_linear",
+                code="""\
 g = {0: [1], 1: [2], 2: [3], 3: []}
 assert bfs(g, 0) == [0, 1, 2, 3]
-"""),
-            TestCase(name="test_branching",
-                     code="""\
+""",
+            ),
+            TestCase(
+                name="test_branching",
+                code="""\
 g = {0: [1, 2], 1: [3], 2: [3], 3: []}
 result = bfs(g, 0)
 assert result[0] == 0
 assert set(result) == {0, 1, 2, 3}
 assert len(result) == 4   # no duplicates
-"""),
-            TestCase(name="test_single_node",
-                     code="""\
+""",
+            ),
+            TestCase(
+                name="test_single_node",
+                code="""\
 g = {0: []}
 assert bfs(g, 0) == [0]
-"""),
+""",
+            ),
         ],
     ),
-
     # ── Task H3: Decorator — wrong wraps usage ──────────────────────────
     Task(
         id="hard-003-decorator-bug",
@@ -224,12 +236,11 @@ def compute(n):
             "Add `@functools.wraps(func)` directly above `def wrapper`.",
         ],
         test_cases=[
-            TestCase(name="test_result",   code="assert compute(5) == 25"),
-            TestCase(name="test_name",     code='assert compute.__name__ == "compute"'),
-            TestCase(name="test_doc",      code='assert compute.__doc__ == "Compute n^2."'),
+            TestCase(name="test_result", code="assert compute(5) == 25"),
+            TestCase(name="test_name", code='assert compute.__name__ == "compute"'),
+            TestCase(name="test_doc", code='assert compute.__doc__ == "Compute n^2."'),
         ],
     ),
-
     # ── Task H4: Stack with linked list — pop bug ───────────────────────
     Task(
         id="hard-004-linked-stack",
@@ -312,40 +323,47 @@ class Stack:
             "Store `removed_val = self.head.val` before updating `self.head`.",
         ],
         test_cases=[
-            TestCase(name="test_push_pop",
-                     code="""\
+            TestCase(
+                name="test_push_pop",
+                code="""\
 s = Stack()
 s.push(1); s.push(2); s.push(3)
 assert s.pop() == 3
 assert s.pop() == 2
 assert s.pop() == 1
-"""),
-            TestCase(name="test_peek",
-                     code="""\
+""",
+            ),
+            TestCase(
+                name="test_peek",
+                code="""\
 s = Stack()
 s.push(42)
 assert s.peek() == 42
 assert s.size == 1
-"""),
-            TestCase(name="test_empty_pop",
-                     code="""\
+""",
+            ),
+            TestCase(
+                name="test_empty_pop",
+                code="""\
 s = Stack()
 try:
     s.pop()
     assert False, "Should have raised"
 except IndexError:
     pass
-"""),
-            TestCase(name="test_size_tracking",
-                     code="""\
+""",
+            ),
+            TestCase(
+                name="test_size_tracking",
+                code="""\
 s = Stack()
 s.push(1); s.push(2)
 s.pop()
 assert s.size == 1
-"""),
+""",
+            ),
         ],
     ),
-
     # ── Task H5: Tokenizer — wrong string parsing ────────────────────────
     Task(
         id="hard-005-tokenizer",
@@ -396,18 +414,17 @@ def tokenize(expr):
 """,
         hints=[
             "The tokenizer doesn't track whether it's inside a quoted string.",
-            "Add an `in_string` flag that toggles when a `\"` is encountered.",
+            'Add an `in_string` flag that toggles when a `"` is encountered.',
             "Only split on spaces when `in_string` is False.",
         ],
         test_cases=[
-            TestCase(name="test_simple",
-                     code='assert tokenize("a + b") == ["a", "+", "b"]'),
-            TestCase(name="test_string_literal",
-                     code='assert tokenize(\'print "hello world"\') == [\'print\', \'"hello world"\']'),
-            TestCase(name="test_no_spaces",
-                     code='assert tokenize("abc") == ["abc"]'),
-            TestCase(name="test_empty",
-                     code='assert tokenize("") == []'),
+            TestCase(name="test_simple", code='assert tokenize("a + b") == ["a", "+", "b"]'),
+            TestCase(
+                name="test_string_literal",
+                code="assert tokenize('print \"hello world\"') == ['print', '\"hello world\"']",
+            ),
+            TestCase(name="test_no_spaces", code='assert tokenize("abc") == ["abc"]'),
+            TestCase(name="test_empty", code='assert tokenize("") == []'),
         ],
     ),
 ]

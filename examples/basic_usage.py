@@ -7,10 +7,11 @@ Perfect for local development, debugging, and understanding the API.
 Run:
     python examples/basic_usage.py
 """
+
 from __future__ import annotations
 
-import sys
 import os
+import sys
 
 # Add src/ to path if running from repo root
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
@@ -24,7 +25,6 @@ from codefix_env import (
     ActionType,
     CodeFixAction,
     CodeFixEnvironment,
-    Difficulty,
     task_count,
 )
 
@@ -46,18 +46,21 @@ def print_observation(obs, label="Observation"):
 
 def demo_easy_task():
     """Demonstrate solving an easy task step by step."""
-    console.print(Panel.fit(
-        "[bold green]CodeFix-Env Basic Demo[/bold green]\n"
-        "Solving: easy-001-missing-return",
-        border_style="green",
-    ))
+    console.print(
+        Panel.fit(
+            "[bold green]CodeFix-Env Basic Demo[/bold green]\n" "Solving: easy-001-missing-return",
+            border_style="green",
+        )
+    )
 
     env = CodeFixEnvironment()
 
     # ── Reset ────────────────────────────────────────────────────────────────
     obs = env.reset(task_id="easy-001-missing-return")
     console.print(f"\n[bold]Task:[/bold] {obs.task_id}")
-    console.print(f"[bold]Description:[/bold] The function adds two numbers but never returns the result.")
+    console.print(
+        "[bold]Description:[/bold] The function adds two numbers but never returns the result."
+    )
     console.print("\n[bold]Buggy code:[/bold]")
     console.print(Syntax(obs.current_code, "python", theme="monokai", line_numbers=True))
 
@@ -75,12 +78,14 @@ def demo_easy_task():
 
     # ── Step 3: Edit the fix ─────────────────────────────────────────────────
     console.print("\n[yellow]Step 3: Fix the bug — add return statement[/yellow]")
-    result = env.step(CodeFixAction(
-        action_type=ActionType.EDIT_LINE,
-        line_number=3,
-        new_content="    return result",
-        reasoning="The function computes result but never returns it. Add return statement.",
-    ))
+    result = env.step(
+        CodeFixAction(
+            action_type=ActionType.EDIT_LINE,
+            line_number=3,
+            new_content="    return result",
+            reasoning="The function computes result but never returns it. Add return statement.",
+        )
+    )
     console.print(f"  Reward: [blue]{result.reward:.3f}[/blue]")
 
     # ── Step 4: Run tests again ───────────────────────────────────────────────
@@ -98,7 +103,9 @@ def demo_easy_task():
 
     # ── Show fixed code ───────────────────────────────────────────────────────
     console.print("\n[bold]Fixed code:[/bold]")
-    console.print(Syntax(result.observation.current_code, "python", theme="monokai", line_numbers=True))
+    console.print(
+        Syntax(result.observation.current_code, "python", theme="monokai", line_numbers=True)
+    )
 
 
 def demo_task_listing():
@@ -115,7 +122,9 @@ def demo_task_listing():
     table.add_column("Tests", justify="right")
 
     for task in list_tasks():
-        diff_color = {"easy": "green", "medium": "yellow", "hard": "red"}.get(task.difficulty, "white")
+        diff_color = {"easy": "green", "medium": "yellow", "hard": "red"}.get(
+            task.difficulty, "white"
+        )
         table.add_row(
             task.id,
             task.title,
@@ -126,8 +135,10 @@ def demo_task_listing():
 
     console.print(table)
     counts = task_count()
-    console.print(f"\nTotal: {counts['total']} tasks "
-                  f"({counts['easy']} easy, {counts['medium']} medium, {counts['hard']} hard)")
+    console.print(
+        f"\nTotal: {counts['total']} tasks "
+        f"({counts['easy']} easy, {counts['medium']} medium, {counts['hard']} hard)"
+    )
 
 
 if __name__ == "__main__":

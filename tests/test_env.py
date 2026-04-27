@@ -1,6 +1,7 @@
 """
 Tests for CodeFixEnvironment — reset, step, all action types.
 """
+
 from __future__ import annotations
 
 import pytest
@@ -12,7 +13,6 @@ from codefix_env.models import (
     CodeFixObservation,
     Difficulty,
     StepResult,
-    TerminationReason,
 )
 
 
@@ -29,6 +29,7 @@ def easy_env(env):
 
 
 # ── reset ─────────────────────────────────────────────────────────────────────
+
 
 class TestReset:
     def test_reset_returns_observation(self, env):
@@ -71,6 +72,7 @@ class TestReset:
 
 # ── run_tests ─────────────────────────────────────────────────────────────────
 
+
 class TestRunTests:
     def test_run_tests_returns_step_result(self, easy_env):
         result = easy_env.step(CodeFixAction(action_type=ActionType.RUN_TESTS))
@@ -88,22 +90,27 @@ class TestRunTests:
 
 # ── edit_line ─────────────────────────────────────────────────────────────────
 
+
 class TestEditLine:
     def test_edit_line_changes_code(self, easy_env):
         obs_before = easy_env._current_code
-        easy_env.step(CodeFixAction(
-            action_type=ActionType.EDIT_LINE,
-            line_number=2,
-            new_content="    return result",
-        ))
+        easy_env.step(
+            CodeFixAction(
+                action_type=ActionType.EDIT_LINE,
+                line_number=2,
+                new_content="    return result",
+            )
+        )
         assert easy_env._current_code != obs_before
 
     def test_edit_invalid_line_returns_error(self, easy_env):
-        result = easy_env.step(CodeFixAction(
-            action_type=ActionType.EDIT_LINE,
-            line_number=999,
-            new_content="x = 1",
-        ))
+        result = easy_env.step(
+            CodeFixAction(
+                action_type=ActionType.EDIT_LINE,
+                line_number=999,
+                new_content="x = 1",
+            )
+        )
         assert result.observation.error_message != ""
         assert result.reward < 0
 
@@ -111,51 +118,63 @@ class TestEditLine:
         # Fix the bug: INSERT return statement after line 3 (the assignment line)
         # buggy_code lines: L1=blank, L2=def, L3=result=a+b
         # We insert after L3 to add '    return result'
-        easy_env.step(CodeFixAction(
-            action_type=ActionType.INSERT_LINE,
-            line_number=3,
-            new_content="    return result",
-        ))
+        easy_env.step(
+            CodeFixAction(
+                action_type=ActionType.INSERT_LINE,
+                line_number=3,
+                new_content="    return result",
+            )
+        )
         result = easy_env.step(CodeFixAction(action_type=ActionType.RUN_TESTS))
         assert result.observation.tests_passed == result.observation.tests_total
 
 
 # ── insert / delete ───────────────────────────────────────────────────────────
 
+
 class TestInsertDeleteLine:
     def test_insert_line(self, easy_env):
         before_lines = easy_env._current_code.count("\n")
-        easy_env.step(CodeFixAction(
-            action_type=ActionType.INSERT_LINE,
-            line_number=2,
-            new_content="    # inserted comment",
-        ))
+        easy_env.step(
+            CodeFixAction(
+                action_type=ActionType.INSERT_LINE,
+                line_number=2,
+                new_content="    # inserted comment",
+            )
+        )
         after_lines = easy_env._current_code.count("\n")
         assert after_lines == before_lines + 1
 
     def test_delete_line(self, easy_env):
         before_lines = easy_env._current_code.count("\n")
-        easy_env.step(CodeFixAction(
-            action_type=ActionType.DELETE_LINE,
-            line_number=1,
-        ))
+        easy_env.step(
+            CodeFixAction(
+                action_type=ActionType.DELETE_LINE,
+                line_number=1,
+            )
+        )
         after_lines = easy_env._current_code.count("\n")
         assert after_lines == before_lines - 1
 
     def test_delete_invalid_line(self, easy_env):
-        result = easy_env.step(CodeFixAction(
-            action_type=ActionType.DELETE_LINE,
-            line_number=9999,
-        ))
+        result = easy_env.step(
+            CodeFixAction(
+                action_type=ActionType.DELETE_LINE,
+                line_number=9999,
+            )
+        )
         assert result.reward < 0
 
 
 # ── hints ─────────────────────────────────────────────────────────────────────
 
+
 class TestHints:
     def test_get_hint_returns_hint(self, easy_env):
         result = easy_env.step(CodeFixAction(action_type=ActionType.GET_HINT))
-        assert "Hint" in result.observation.feedback or "hint" in result.observation.feedback.lower()
+        assert (
+            "Hint" in result.observation.feedback or "hint" in result.observation.feedback.lower()
+        )
 
     def test_hint_costs_reward(self, easy_env):
         result = easy_env.step(CodeFixAction(action_type=ActionType.GET_HINT))
@@ -164,6 +183,7 @@ class TestHints:
     def test_hints_exhausted(self, easy_env):
         # Exhaust all hints dynamically regardless of how many the task has
         from codefix_env.tasks import load_task
+
         task = load_task("easy-001-missing-return")
         num_hints = len(task.hints)
         for _ in range(num_hints):
@@ -175,6 +195,7 @@ class TestHints:
 
 # ── submit ────────────────────────────────────────────────────────────────────
 
+
 class TestSubmit:
     def test_submit_ends_episode(self, easy_env):
         result = easy_env.step(CodeFixAction(action_type=ActionType.SUBMIT_FIX))
@@ -182,11 +203,13 @@ class TestSubmit:
 
     def test_submit_after_fix_gives_high_reward(self, easy_env):
         # Fix the bug first — insert return after assignment line
-        easy_env.step(CodeFixAction(
-            action_type=ActionType.INSERT_LINE,
-            line_number=3,
-            new_content="    return result",
-        ))
+        easy_env.step(
+            CodeFixAction(
+                action_type=ActionType.INSERT_LINE,
+                line_number=3,
+                new_content="    return result",
+            )
+        )
         result = easy_env.step(CodeFixAction(action_type=ActionType.SUBMIT_FIX))
         assert result.reward > 0.5
 
@@ -197,6 +220,7 @@ class TestSubmit:
 
 
 # ── max steps ─────────────────────────────────────────────────────────────────
+
 
 class TestMaxSteps:
     def test_truncated_at_max_steps(self):
@@ -210,6 +234,7 @@ class TestMaxSteps:
 
 # ── diff tracking ─────────────────────────────────────────────────────────────
 
+
 class TestDiff:
     def test_diff_empty_on_no_change(self, easy_env):
         result = easy_env.step(CodeFixAction(action_type=ActionType.RUN_TESTS))
@@ -217,10 +242,12 @@ class TestDiff:
         assert isinstance(result.observation.diff, str)
 
     def test_diff_populated_after_edit(self, easy_env):
-        easy_env.step(CodeFixAction(
-            action_type=ActionType.EDIT_LINE,
-            line_number=2,
-            new_content="    return result",
-        ))
+        easy_env.step(
+            CodeFixAction(
+                action_type=ActionType.EDIT_LINE,
+                line_number=2,
+                new_content="    return result",
+            )
+        )
         result = easy_env.step(CodeFixAction(action_type=ActionType.VIEW_CODE))
         assert "---" in result.observation.diff or "+++" in result.observation.diff
