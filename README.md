@@ -30,32 +30,35 @@
 
 ---
 
-## Overview
+## 📖 Overview
 
 CodeFix-Env is a **Gymnasium-compatible RL environment** that simulates real-world Python code debugging workflows. It enables researchers and engineers to:
 
-- Train large language models (LLMs) on code repair tasks
-- Evaluate AI agents on real debugging scenarios
-- Benchmark code generation and reasoning capabilities
-- Build automated debugging systems
+*   **Train** large language models (LLMs) on code repair tasks.
+*   **Evaluate** AI agents on real debugging scenarios.
+*   **Benchmark** code generation and reasoning capabilities.
+*   **Build** automated debugging systems.
 
-Perfect for anyone working with LLMs like Qwen, Llama, CodeLlama, or DeepSeek models.
+> **Compatible with:** Qwen, Llama, CodeLlama, DeepSeek, and other leading LLMs.
+
 ---
 
-### The Challenge
+### 🔴 The Challenge
 Training Large Language Models (LLMs) for code generation and autonomous repair requires more than static data. Effective learning requires:
-* **Authentic Scenarios:** Moving beyond synthetic examples to real-world debugging.
-* **Tight Feedback Loops:** Providing immediate test results and error logs.
-* **Measurable Progress:** Quantifiable metrics based on test pass rates.
-* **Secure Execution:** Sandboxed environments to prevent unsafe code execution.
 
-### The Solution: CodeFix-Env
+*   **Authentic Scenarios:** Moving beyond synthetic examples to real-world debugging.
+*   **Tight Feedback Loops:** Providing immediate test results and error logs.
+*   **Measurable Progress:** Quantifiable metrics based on test pass rates.
+*   **Secure Execution:** Sandboxed environments to prevent unsafe code execution.
+
+### 🟢 The Solution: CodeFix-Env
 CodeFix-Env is a specialized environment designed for RL agents and LLMs to master code repair through:
-* **Real-World Tasks:** 21 curated Python bugs ranging from logic errors to complex edge cases.
-* **Test-Driven Feedback:** Agents receive granular execution data after every action.
-* **Multi-Factor Rewards:** Reward signals based on test progress, code quality, and task completion.
-* **Isolated Execution:** Built-in sandboxing with timeout protection for safe evaluations.
-* **Structured Interaction:** Clean API for structured actions that LLMs can reliably generate.
+
+*   **Real-World Tasks:** 21 curated Python bugs ranging from logic errors to complex edge cases.
+*   **Test-Driven Feedback:** Agents receive granular execution data after every action.
+*   **Multi-Factor Rewards:** Reward signals based on test progress, code quality, and task completion.
+*   **Isolated Execution:** Built-in sandboxing with timeout protection for safe evaluations.
+*   **Structured Interaction:** Clean API for structured actions that LLMs can reliably generate.
 
 ### Workflow
 ```mermaid
