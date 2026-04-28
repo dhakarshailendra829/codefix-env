@@ -13,14 +13,13 @@
 
 ---
 </div>
-
+Usage & Development Guide
 ## 📖 Table of Contents
 
 - [Overview](#overview)
 - [Key Features](#key-features)
 - [Installation](#installation)
-- [Quick Start](#quick-start)
-- [What It Does](#what-it-does)
+- [Quick Start](#Usage-and-developement-guide)
 - [Task Categories](#task-categories)
 - [Usage Examples](#usage-examples)
 - [LLM Training](#llm-training)
@@ -32,7 +31,7 @@
 
 ---
 
-## 📌 Overview
+## Overview
 
 CodeFix-Env is a **Gymnasium-compatible RL environment** that simulates real-world Python code debugging workflows. It enables researchers and engineers to:
 
@@ -79,27 +78,27 @@ graph TD
 ```
 ---
 
-## ✨ Key Features
+## Key Features
 
-**🧪 Task Library**
+** Task Library**
 - 21 carefully designed debugging tasks
 - 3 difficulty levels: Easy (8), Medium (8), Hard (5)
 - Each task includes buggy code, solution, test cases, and hints
 - Covers real Python patterns: loops, recursion, algorithms, decorators
 
-**🤖 LLM Integration**
+** LLM Integration**
 - Works with HuggingFace Transformers ecosystem
 - Compatible with training frameworks: SFT, DPO, GRPO, PPO
 - Pre-built support for Qwen, Llama, CodeLlama, DeepSeek models
 - Structured JSON action interface for LLM control
 
-**⚡ Performance**
+** Performance**
 - Multiprocessing-based sandbox with timeout enforcement
 - Per-test execution isolation
 - 197 unit tests with 83% code coverage
 - Automated CI/CD pipeline (Python 3.10, 3.11, 3.12)
 
-**🔄 Developer Friendly**
+** Developer Friendly**
 - Gymnasium standard interface
 - Async client for high-performance training
 - Sync wrapper for notebooks
@@ -108,7 +107,7 @@ graph TD
 
 ---
 
-## 💻 Installation
+## Installation
 
 ### Step 1: Clone Repository
 
@@ -198,7 +197,7 @@ cd codefix-env
 uvicorn src.codefix_env.server.app:app --reload --port 8000
 ```
 ---
-## 💡 Usage Examples
+## Usage Examples
 
 ### 1. Core Debugging Workflow
 A complete cycle from task initialization to final submission.
@@ -222,7 +221,7 @@ result = env.step(CodeFixAction(
 
 # 3. Final Verification & Submission
 result = env.step(CodeFixAction(action_type=ActionType.SUBMIT_FIX))
-print(f"✅ Status: {'Solved' if result.observation.all_tests_pass else 'Failed'}")
+print(f"Status: {'Solved' if result.observation.all_tests_pass else 'Failed'}")
 print(f"Final Reward: {result.reward:.3f}")
 ```
 
@@ -243,7 +242,7 @@ for task in easy_tasks[:5]:
 
 ---
 
-## 🤖 LLM Training & Integration
+## LLM Training & Integration
 
 ### Server-Client Architecture
 Deploy the environment as a service to scale LLM evaluations across multiple agents.
@@ -291,7 +290,7 @@ suggestion = fixer(prompt)
 
 ---
 
-## 📡 API Quick Reference
+## API Quick Reference
 
 
 | Class / Method | Description |
@@ -304,7 +303,7 @@ suggestion = fixer(prompt)
 
 ---
 
-## 🔄 Development & CI/CD
+## Development & CI/CD
 Standard commands for maintaining the environment.
 
 ```bash
