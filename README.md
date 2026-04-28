@@ -13,7 +13,6 @@
 
 ---
 </div>
-Usage & Development Guide
 ## 📖 Table of Contents
 
 - [Overview](#overview)
