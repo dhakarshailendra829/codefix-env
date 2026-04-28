@@ -84,22 +84,22 @@ source .venv/bin/activate (On mac)
 .venv/Scripts/activate (On Windows)
 ```
 ### Step 3: Intall Package
-# For Basic Usage
+#### For Basic Usage
 ```bash
 pip install -e . 
 ```
 --
-# For Developement
+#### For Developement
 ```bash
 pip install -e ".[dev]"
 ```
 ---
-# For LLM training (includes transformers, TRL, datasets)
+#### For LLM training (includes transformers, TRL, datasets)
 ```bash
 pip install -e ".[llm]"
 ```
 ---
-# For everything
+#### For everything
 ```bash
 pip install -e ".[dev,llm]"
 ```
