@@ -1,4 +1,8 @@
-# CodeFix-Env
+<div align="center">
+
+# 🛠️ CodeFix-Env
+
+**A specialized RL environment for training LLMs to autonomously debug and repair code through sandboxed feedback loops.**
 
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue)](https://www.python.org/downloads/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.2%2B-red)](https://pytorch.org/)
@@ -7,7 +11,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Tests](https://img.shields.io/badge/Tests-197%2F197%20Passing-brightgreen)](tests/)
 
-A production-ready reinforcement learning environment for training and evaluating large language models on automated code debugging tasks.
+---
+</div>
 
 ## 📖 Table of Contents
 
