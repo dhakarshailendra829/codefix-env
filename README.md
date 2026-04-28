@@ -5,75 +5,109 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.110%2B-green)](https://fastapi.tiangolo.com/)
 [![HuggingFace](https://img.shields.io/badge/HuggingFace-Compatible-yellow)](https://huggingface.co/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Tests Passing](https://img.shields.io/badge/Tests-197%2F197%20Passing-brightgreen)](tests/)
-[![Code Quality](https://img.shields.io/badge/Code%20Quality-A-brightgreen)](https://github.com/dhakarshailendra829/codefix-env)
+[![Tests](https://img.shields.io/badge/Tests-197%2F197%20Passing-brightgreen)](tests/)
 
-**A production-ready reinforcement learning environment for training and evaluating large language models on automated code debugging tasks.**
+A production-ready reinforcement learning environment for training and evaluating large language models on automated code debugging tasks.
 
-CodeFix-Env is a comprehensive platform designed for machine learning engineers and researchers to build, train, and deploy intelligent code debugging agents. Featuring 21+ curated programming tasks, secure sandbox execution, and seamless integration with state-of-the-art LLMs and training frameworks.
+## 📖 Table of Contents
+
+- [Overview](#overview)
+- [Key Features](#key-features)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [What It Does](#what-it-does)
+- [Task Categories](#task-categories)
+- [Usage Examples](#usage-examples)
+- [LLM Training](#llm-training)
+- [API Reference](#api-reference)
+- [CI/CD Pipeline](#cicd-pipeline)
+- [Development](#development)
+- [Contributing](#contributing)
+- [License](#license)
 
 ---
 
-## 🎯 What is CodeFix-Env?
+## 📌 Overview
 
-CodeFix-Env is a **Gymnasium-compatible RL environment** that simulates real-world Python code debugging workflows. It bridges the gap between academic reinforcement learning and practical software engineering by providing:
+CodeFix-Env is a **Gymnasium-compatible RL environment** that simulates real-world Python code debugging workflows. It enables researchers and engineers to:
 
-- **Real debugging scenarios** with authentic Python bugs across multiple complexity levels
-- **LLM-ready interface** compatible with HuggingFace Transformers, OpenAI API, and Anthropic Claude
-- **Secure code execution** with sandboxed environments and timeout protection
-- **Reward shaping** combining multiple signals (test progress, code similarity, completion bonuses)
-- **Production infrastructure** including FastAPI server, async client, and CI/CD pipelines
+- Train large language models (LLMs) on code repair tasks
+- Evaluate AI agents on real debugging scenarios
+- Benchmark code generation and reasoning capabilities
+- Build automated debugging systems
 
-Perfect for researchers training code repair models, companies building AI-powered debugging tools, and developers benchmarking LLM capabilities.
+Perfect for anyone working with LLMs like Qwen, Llama, CodeLlama, or DeepSeek models.
 
 ---
 
-## ✨ Key Capabilities
+## ✨ Key Features
 
 **🧪 Task Library**
-- 21 carefully designed debugging tasks spanning 3 difficulty levels (easy, medium, hard)
-- Each task includes buggy code, solution, test cases, and expert hints
-- Covers real programming patterns: loops, recursion, data structures, algorithms, decorators
+- 21 carefully designed debugging tasks
+- 3 difficulty levels: Easy (8), Medium (8), Hard (5)
+- Each task includes buggy code, solution, test cases, and hints
+- Covers real Python patterns: loops, recursion, algorithms, decorators
 
 **🤖 LLM Integration**
-- Pre-built support for HuggingFace Transformers ecosystem
-- Compatible with fine-tuning frameworks: SFT, DPO, GRPO, PPO
-- Example implementations for Qwen, Llama, CodeLlama, DeepSeek models
-- Structured JSON action interface for reliable LLM control
+- Works with HuggingFace Transformers ecosystem
+- Compatible with training frameworks: SFT, DPO, GRPO, PPO
+- Pre-built support for Qwen, Llama, CodeLlama, DeepSeek models
+- Structured JSON action interface for LLM control
 
-**⚡ Performance & Reliability**
-- Multiprocessing-based sandbox with 5-second timeout enforcement
-- Per-test execution isolation (no state leakage between test cases)
-- Comprehensive test coverage: 197 tests, 83% coverage
-- Automated CI/CD with multi-Python version testing (3.10, 3.11, 3.12)
+**⚡ Performance**
+- Multiprocessing-based sandbox with timeout enforcement
+- Per-test execution isolation
+- 197 unit tests with 83% code coverage
+- Automated CI/CD pipeline (Python 3.10, 3.11, 3.12)
 
-**🔄 Developer Experience**
-- Simple Gymnasium interface matching industry standards
-- Async client for high-performance training loops
-- Sync wrapper for notebooks and scripts
+**🔄 Developer Friendly**
+- Gymnasium standard interface
+- Async client for high-performance training
+- Sync wrapper for notebooks
 - FastAPI HTTP server for remote access
 - Complete type hints and documentation
 
 ---
 
-## 🚀 Quick Start
+## 💻 Installation
 
-### Installation
+### Step 1: Clone Repository
 
 ```bash
-# Clone repository
 git clone https://github.com/dhakarshailendra829/codefix-env.git
 cd codefix-env
-
-# Create environment
+```
+### Step 2: Create virual Environment
+```bash
 python3.11 -m venv .venv
-source .venv/bin/activate  # Windows: .venv\Scripts\activate
-
-# Install package
-pip install -e .
-
-# For LLM training support
-pip install -e ".[llm]"
-
-# For development
+source .venv/bin/activate (On mac)
+.venv/Scripts/activate (On Windows)
+```
+### Step 3: Intall Package
+# For Basic Usage
+```bash
+pip install -e . 
+```
+--
+# For Developement
+```bash
 pip install -e ".[dev]"
+```
+---
+# For LLM training (includes transformers, TRL, datasets)
+```bash
+pip install -e ".[llm]"
+```
+---
+# For everything
+```bash
+pip install -e ".[dev,llm]"
+```
+### Step 4: Verify Installation
+```bash
+python -c "from codefix_env import CodeFixEnvironment; print(' Installation successful!')"
+```
+```bash
+```
+```bash
+```
