@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🛠️ CodeFix-Env
+# CodeFix-Env
 
 **A specialized RL environment for training LLMs to autonomously debug and repair code through sandboxed feedback loops.**
 
@@ -13,7 +13,7 @@
 
 ---
 </div>
-## 📖 Table of Contents
+## Table of Contents
 
 - [Overview](#overview)
 - [Key Features](#key-features)
