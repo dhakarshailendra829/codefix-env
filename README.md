@@ -300,3 +300,43 @@ ruff check src/   # Linting
 black --check src/ # Formatting
 mypy src/         # Type Checking
 ```
+---
+
+<div align="center">
+
+# 🛠️ LLM Ecosystem & Infrastructure
+
+### 🤖 LLM Models
+
+| Model | Description |
+| :--- | :--- |
+| 🟢 **Qwen 1.5B, 7B, 14B** | Alibaba's instruction models |
+| 🟢 **Llama 2-7B-Chat** | Meta's foundation model |
+| 🟢 **CodeLlama 7B, 13B, 34B** | Specialized for code |
+| 🟢 **DeepSeek Coder 1.3B, 6.7B** | Chinese LLM for code |
+| 🟢 **Mistral 7B** | Open-source efficient model |
+
+<br/>
+
+### ⚙️ Training Frameworks
+
+| Framework | Method |
+| :--- | :--- |
+| 🟢 **SFT** | Supervised fine-tuning |
+| 🟢 **DPO** | Direct preference optimization |
+| 🟢 **GRPO** | Group relative policy optimization |
+| 🟢 **PPO** | Proximal policy optimization |
+
+<br/>
+
+### 🏗️ Infrastructure
+
+| Tool | Purpose |
+| :--- | :--- |
+| 🟢 **HuggingFace** | Model hub & training |
+| 🟢 **vLLM** | Fast LLM serving |
+| 🟢 **Ollama** | Local model deployment |
+| 🟢 **Docker** | Containerization |
+| 🟢 **GitHub Actions** | CI/CD |
+
+</div>
