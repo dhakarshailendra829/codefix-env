@@ -10,19 +10,39 @@
 
 <p align="center">
   <!-- Red -->
-  <a href="https://pytorch.org"><img src="https://shields.io" alt="PyTorch"></a>
+  <a href="https://pytorch.org/">
+    <img src="https://img.shields.io/badge/PyTorch-EE4C2C?style=for-the-badge&logo=pytorch&logoColor=white" alt="PyTorch">
+  </a>
+
   <!-- Orange -->
-  <a href="https://vllm.ai"><img src="https://shields.io" alt="vLLM"></a>
+  <a href="https://vllm.ai/">
+    <img src="https://img.shields.io/badge/vLLM-F97316?style=for-the-badge&logo=fastapi&logoColor=white" alt="vLLM">
+  </a>
+
   <!-- Yellow -->
-  <a href="https://huggingface.co"><img src="https://shields.io" alt="HuggingFace"></a>
+  <a href="https://huggingface.co/">
+    <img src="https://img.shields.io/badge/HuggingFace-FFD21E?style=for-the-badge&logo=huggingface&logoColor=black" alt="HuggingFace">
+  </a>
+
   <!-- Green -->
-  <a href="https://tiangolo.com"><img src="https://shields.io" alt="FastAPI"></a>
+  <a href="https://fastapi.tiangolo.com/">
+    <img src="https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI">
+  </a>
+
   <!-- Blue -->
-  <a href="https://docker.com"><img src="https://shields.io" alt="Docker"></a>
+  <a href="https://www.docker.com/">
+    <img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker">
+  </a>
+
   <!-- Indigo -->
-  <a href="https://github.com"><img src="https://shields.io" alt="CI/CD"></a>
+  <a href="https://github.com/">
+    <img src="https://img.shields.io/badge/CI/CD-181717?style=for-the-badge&logo=githubactions&logoColor=white" alt="CI/CD">
+  </a>
+
   <!-- Violet -->
-  <a href="https://ollama.com"><img src="https://shields.io" alt="Ollama"></a>
+  <a href="https://ollama.com/">
+    <img src="https://img.shields.io/badge/Ollama-7C3AED?style=for-the-badge&logo=llama&logoColor=white" alt="Ollama">
+  </a>
 </p>
 
 
