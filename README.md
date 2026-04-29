@@ -23,18 +23,26 @@
   <a href="tests/"><img src="https://img.shields.io/badge/Tests-197%2F197%20Passing-brightgreen?style=flat-square"></a>
   <a href="https://github.com/dhakarshailendra829/codefix-env"><img src="https://img.shields.io/github/stars/dhakarshailendra829/codefix-env?style=flat-square"></a>
 </p>
-</div>
+
 ---
+
 ### 📖 Overview
 
 CodeFix-Env is a **Gymnasium-compatible RL environment** that simulates real-world Python code debugging workflows. It enables researchers and engineers to:
 
-*   **Train** large language models (LLMs) on code repair tasks.
-*   **Evaluate** AI agents on real debugging scenarios.
-*   **Benchmark** code generation and reasoning capabilities.
-*   **Build** automated debugging systems.
+
+| Goal | Description |
+| :--- | :--- |
+| **Train** | Large language models (LLMs) on code repair tasks. |
+| **Evaluate** | AI agents on real debugging scenarios. |
+| **Benchmark** | Code generation and reasoning capabilities. |
+| **Build** | Automated debugging systems. |
 
 > **Compatible with:** Qwen, Llama, CodeLlama, DeepSeek, and other leading LLMs.
+
+---
+
+</div>
 
 ---
 
