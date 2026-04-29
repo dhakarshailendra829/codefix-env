@@ -12,24 +12,6 @@
 [![Tests](https://img.shields.io/badge/Tests-197%2F197%20Passing-brightgreen)](tests/)
 
 ---
-</div>
-## Table of Contents
-
-- [Overview](#overview)
-- [Key Features](#key-features)
-- [Installation](#installation)
-- [Quick Start](#Usage-and-developement-guide)
-- [Task Categories](#task-categories)
-- [Usage Examples](#usage-examples)
-- [LLM Training](#llm-training)
-- [API Reference](#api-reference)
-- [CI/CD Pipeline](#cicd-pipeline)
-- [Development](#development)
-- [Contributing](#contributing)
-- [License](#license)
-
----
-
 ## 📖 Overview
 
 CodeFix-Env is a **Gymnasium-compatible RL environment** that simulates real-world Python code debugging workflows. It enables researchers and engineers to:
