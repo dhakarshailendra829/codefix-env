@@ -4,13 +4,25 @@
 
 **A specialized RL environment for training LLMs to autonomously debug and repair code through sandboxed feedback loops.**
 
-[![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue)](https://www.python.org/downloads/)
-[![PyTorch](https://img.shields.io/badge/PyTorch-2.2%2B-red)](https://pytorch.org/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.110%2B-green)](https://fastapi.tiangolo.com/)
-[![HuggingFace](https://img.shields.io/badge/HuggingFace-Compatible-yellow)](https://huggingface.co/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/Tests-197%2F197%20Passing-brightgreen)](tests/)
-</div>
+<p align="center">
+  <strong>A high-performance PyTorch-based RL environment for autonomous code debugging and LLM agent evaluation.</strong>
+</p>
+
+<p align="center">
+  <a href="https://pytorch.org/"><img src="https://img.shields.io/badge/PyTorch-EE4C2C?style=for-the-badge&logo=pytorch&logoColor=white" alt="PyTorch 2.2+"></a>
+  <a href="https://huggingface.co/"><img src="https://img.shields.io/badge/HuggingFace-FFD21E?style=for-the-badge&logo=huggingface&logoColor=black" alt="HuggingFace"></a>
+  <a href="https://fastapi.tiangolo.com/"><img src="https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI"></a>
+</p>
+
+<p align="center">
+  <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/Python-3.10%2B-3776ab?style=flat-square&logo=python&logoColor=white"></a>
+  <a href="https://pytorch.org/"><img src="https://img.shields.io/badge/PyTorch-2.2%2B-ee4c2c?style=flat-square&logo=pytorch&logoColor=white"></a>
+  <a href="https://fastapi.tiangolo.com/"><img src="https://img.shields.io/badge/FastAPI-0.110%2B-009688?style=flat-square&logo=fastapi&logoColor=white"></a>
+  <a href="https://gymnasium.farama.org/"><img src="https://img.shields.io/badge/Gymnasium-Compatible-4B8BBE?style=flat-square"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=flat-square"></a>
+  <a href="tests/"><img src="https://img.shields.io/badge/Tests-197%2F197%20Passing-brightgreen?style=flat-square"></a>
+  <a href="https://github.com/dhakarshailendra829/codefix-env"><img src="https://img.shields.io/github/stars/dhakarshailendra829/codefix-env?style=flat-square"></a>
+</p>
 
 ## 📖 Overview
 
