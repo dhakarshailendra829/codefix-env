@@ -10,7 +10,7 @@
 [![HuggingFace](https://img.shields.io/badge/HuggingFace-Compatible-yellow)](https://huggingface.co/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Tests](https://img.shields.io/badge/Tests-197%2F197%20Passing-brightgreen)](tests/)
-
+</div>
 ---
 
 ## 📖 Overview
