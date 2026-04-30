@@ -2,10 +2,10 @@
 
 # CodeFix-Env
 
-**A specialized RL environment for training LLMs to autonomously debug and repair code through sandboxed feedback loops.**
+**A reinforcement learning environment for training LLM-driven agents to autonomously debug, localize, and repair code through sandboxed execution and feedback-driven learning.**
 
 <p align="center">
-  <strong>A high-performance PyTorch-based RL environment for autonomous code debugging and LLM agent evaluation.</strong>
+  <strong>Built for scalable agent evaluation on real-world software debugging tasks.</strong>
 </p>
 
 <p align="center">
