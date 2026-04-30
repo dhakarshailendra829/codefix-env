@@ -70,7 +70,7 @@ CodeFix-Env is a **Gymnasium-compatible RL environment** that simulates real-wor
 | **Benchmark** | Code generation and reasoning capabilities. |
 | **Build** | Automated debugging systems. |
 
-> **Compatible with:** Qwen, Llama, CodeLlama, DeepSeek, and other leading LLMs.
+**Compatible with:** Qwen, Llama, CodeLlama, DeepSeek, and other leading LLMs.
 
 ---
 
