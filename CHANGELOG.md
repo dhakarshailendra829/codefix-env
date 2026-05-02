@@ -45,3 +45,8 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - `CodeFixAction` with `run_tests`, `edit_line`, `submit_fix`
 - Docker deployment
 - OpenEnv YAML config
+
+### Features
+- Multi-factor reward signals
+- Sandboxed code execution with timeout protection
+- Support for SFT, DPO, GRPO, PPO training frameworks
