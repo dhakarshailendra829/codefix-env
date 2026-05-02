@@ -6,7 +6,7 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
-## [0.2.0] — 2025-04-22
+## [0.2.0] — 2026-04-22
 
 ### Added
 - Full `src/` layout with proper Python packaging
@@ -37,7 +37,7 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
-## [0.1.0] — 2025-03-15
+## [0.1.0] — 2026-03-15
 
 ### Added
 - Initial MVP: 3 tasks (easy, medium, hard)
