@@ -356,7 +356,7 @@ mypy src/         # Type Checking
 
 <div align="center">
 
-# 🛠️ LLM Ecosystem & Infrastructure
+# LLM Ecosystem & Infrastructure
 
 ### LLM Models
 
