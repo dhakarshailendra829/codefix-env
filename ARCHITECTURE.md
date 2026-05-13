@@ -14,7 +14,7 @@ The RL loop is the core of the learning process. It consists of the following st
 | Feedback       | Environment provides feedback and rewards.              |
 | Update         | Policy is updated based on feedback.                    |
 
-## 2. ML/AI Components
+## 2. Machine Learning & Artificial Intelligence Components
 
 ### 2.1 Components Overview
 
