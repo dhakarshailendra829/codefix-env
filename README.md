@@ -304,7 +304,7 @@ async def collect_trajectories():
             "context": obs.test_output,
             "metadata": {"task_id": obs.task_id}
         }
-        # Append to training_data.jsonl...
+        # Append to training_data.jsonl....
 ```
 
 ### Zero-Shot Inference (HuggingFace)
@@ -320,7 +320,7 @@ fixer = pipeline("text-generation", model="Qwen/Qwen2.5-Coder-7B")
 env = CodeFixEnvironment()
 obs = env.reset(difficulty="easy")
 
-# Generate fix based on environment observation
+# Generate a fix based on environment observation
 prompt = f"Fix this Python code based on these errors: {obs.test_output}\nCode:\n{obs.current_code}"
 suggestion = fixer(prompt)
 ```
