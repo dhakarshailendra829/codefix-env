@@ -392,3 +392,5 @@ mypy src/         # Type Checking
 | 🟢 **GitHub Actions** | CI/CD |
 
 </div>
+---
+## Note:- This is pure backend system not frontend, we are working on frontent very soon we will update.
