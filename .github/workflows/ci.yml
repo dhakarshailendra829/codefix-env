@@ -35,12 +35,14 @@ jobs:
 
       - name: Type check (mypy)
         run: mypy src/codefix_env/ --ignore-missing-imports
-        continue-on-error: true # tighten to required once codebase is fully typed
+        continue-on-error: true   # tighten later
 
       - name: Run tests with coverage
         run: |
           PYTHONPATH=src pytest tests/ -v --timeout=60 \
-            --cov=src/codefix_env --cov-report=xml --cov-report=term
+            --cov=src/codefix_env \
+            --cov-report=xml \
+            --cov-report=term
 
       - name: Upload coverage
         uses: actions/upload-artifact@v4
@@ -49,13 +51,22 @@ jobs:
           path: coverage.xml
 
   cli-smoke-test:
-    name: verify console script actually works
+    name: CLI Smoke Test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - run: pip install -e .
-      - name: Confirm codefix-server entry point resolves
-        run: codefix-server info
+
+      - name: Install package
+        run: pip install -e .
+
+      - name: Confirm server actually boots
+        run: |
+          codefix-server serve --port 8123 &
+          SERVER_PID=$!
+          sleep 4
+          curl -f http://localhost:8123/health || (echo "Server failed to start" && kill $SERVER_PID && exit 1)
+          kill $SERVER_PID

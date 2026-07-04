@@ -37,7 +37,19 @@ def serve(
     reload: bool = typer.Option(False, help="Auto-reload on code changes (dev only)."),
 ) -> None:
     """Start the CodeFix-Env FastAPI server."""
+    import sys
+    from pathlib import Path
+
     import uvicorn
+
+    # `server/` lives at the repo root, not under src/, so it isn't on
+    # sys.path just because codefix_env is pip-installed. Add the repo
+    # root explicitly so `server.app:app` is importable regardless of
+    # cwd or PYTHONPATH — this was silently broken before (CI only
+    # tested `codefix-server info`, never `serve`, so it went unnoticed).
+    repo_root = Path(__file__).resolve().parents[2]
+    if str(repo_root) not in sys.path:
+        sys.path.insert(0, str(repo_root))
 
     uvicorn.run("server.app:app", host=host, port=port, reload=reload)
 
