@@ -29,7 +29,8 @@ import os
 import sys
 from typing import Optional
 
-from codefix_env.models import CodeFixAction, CodeFixClient
+from codefix_env.client import CodeFixClient
+from codefix_env.models import CodeFixAction
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 

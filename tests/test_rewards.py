@@ -10,13 +10,13 @@ from codefix_env.models import ActionType, BugCategory, CodeFixObservation, Diff
 from codefix_env.rewards import RewardPipeline
 from codefix_env.utils.metrics import (
     EpisodeMetrics,
-    RewardMLP,
     ScoringConfig,
     compute_diff_score,
     compute_final_score,
     compute_shaped_reward,
     compute_test_score,
 )
+from codefix_env.utils.reward_model import RewardMLP
 
 # ── compute_test_score ────────────────────────────────────────────────────────
 

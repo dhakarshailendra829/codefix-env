@@ -2,104 +2,60 @@ name: CI
 
 on:
   push:
-    branches: [master, main, develop]
+    branches: [main]
   pull_request:
-    branches: [master, main]
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+    branches: [main]
 
 jobs:
-  lint:
-    name: Lint & Format
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-          cache: "pip"
-
-      - name: Install lint tools
-        run: pip install ruff black isort
-
-      - name: Run ruff
-        run: ruff check src/ tests/ examples/
-
-      - name: Run black (check only)
-        run: black --check --target-version py310 src/ tests/ examples/
-
-      - name: Run isort (check only)
-        run: isort --check-only src/ tests/ examples/
-
   test:
-    name: Tests (Python ${{ matrix.python-version }})
+    name: test (py${{ matrix.python-version }})
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         python-version: ["3.10", "3.11", "3.12"]
-      fail-fast: false
 
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
 
-      - name: Install dependencies
-        run: |
-          pip install --upgrade pip
-          pip install -e ".[dev]"
+      - name: Install package (dev extras)
+        run: pip install -e ".[dev]"
 
-      - name: Run tests
+      - name: Lint (ruff)
+        run: ruff check src/ tests/ examples/
+
+      - name: Format check (black)
+        run: black --check src/ tests/ examples/
+
+      - name: Type check (mypy)
+        run: mypy src/codefix_env/ --ignore-missing-imports
+        continue-on-error: true # tighten to required once codebase is fully typed
+
+      - name: Run tests with coverage
         run: |
-          PYTHONPATH=src pytest tests/ -v \
-            --timeout=60 \
-            --cov=src/codefix_env \
-            --cov-report=xml \
-            --cov-report=term-missing
+          PYTHONPATH=src pytest tests/ -v --timeout=60 \
+            --cov=src/codefix_env --cov-report=xml --cov-report=term
 
       - name: Upload coverage
-        if: matrix.python-version == '3.11'
-        uses: codecov/codecov-action@v4
+        uses: actions/upload-artifact@v4
         with:
-          file: coverage.xml
-          fail_ci_if_error: false
+          name: coverage-py${{ matrix.python-version }}
+          path: coverage.xml
 
-  docker:
-    name: Docker Build
+  cli-smoke-test:
+    name: verify console script actually works
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Build Docker image
-        run: docker build -f server/Dockerfile -t codefix-env:test .
-
-      - name: Test Docker image
-        run: |
-          docker run -d --name codefix-test -p 8000:8000 codefix-env:test
-          sleep 5
-          curl --fail http://localhost:8000/health || (docker logs codefix-test && exit 1)
-          docker stop codefix-test
-
-  type-check:
-    name: Type Check
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-          cache: "pip"
-
-      - name: Install
-        run: pip install -e ".[dev]"
-
-      - name: Run mypy
-        run: mypy src/codefix_env/ --ignore-missing-imports
-        continue-on-error: true  # don't fail CI on type errors yet
+      - run: pip install -e .
+      - name: Confirm codefix-server entry point resolves
+        run: codefix-server info

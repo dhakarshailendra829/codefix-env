@@ -7,6 +7,12 @@ High-level reward computation that combines:
 3. Reward normalisation across an episode
 
 Used by the environment server on every step.
+
+NOTE: torch and RewardMLP are imported lazily inside __init__, only when
+a neural_model_path is actually provided. This keeps importing
+codefix_env fast (no torch load) for the common case of rule-based-only
+reward, which matters a lot for sandboxed worker processes that re-import
+the whole package on every spawn (see utils/sandbox.py).
 """
 
 from __future__ import annotations
@@ -16,12 +22,9 @@ import os
 from pathlib import Path
 from typing import Optional
 
-import torch
-
 from codefix_env.models import ActionType, CodeFixObservation, Task
 from codefix_env.utils.metrics import (
     EpisodeMetrics,
-    RewardMLP,
     ScoringConfig,
     compute_diff_score,
     compute_final_score,
@@ -50,11 +53,17 @@ class RewardPipeline:
     ):
         self.cfg = cfg
         self.neural_weight = neural_weight
-        self._neural_model: Optional[RewardMLP] = None
+        self._neural_model = None
 
-        # Load pre-trained neural reward model if provided
+        # Load pre-trained neural reward model if provided.
+        # torch + RewardMLP are imported here, not at module top, so the
+        # common no-neural-model path never pays torch's import cost.
         if neural_model_path and Path(neural_model_path).exists():
             try:
+                import torch
+
+                from codefix_env.utils.reward_model import RewardMLP
+
                 self._neural_model = RewardMLP()
                 state = torch.load(neural_model_path, map_location="cpu", weights_only=True)
                 self._neural_model.load_state_dict(state)
@@ -142,7 +151,7 @@ class RewardPipeline:
         )
 
 
-# Singleton default pipeline (no neural model)
+# Singleton default pipeline (no neural model unless env var is set)
 default_pipeline = RewardPipeline(
     cfg=ScoringConfig(),
     neural_model_path=os.environ.get("CODEFIX_REWARD_MODEL_PATH"),

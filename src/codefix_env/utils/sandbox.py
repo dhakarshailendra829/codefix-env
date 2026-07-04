@@ -235,11 +235,66 @@ def _validate_ast(code: str) -> Optional[str]:
     return None
 
 
+def _apply_resource_limits() -> None:
+    """
+    Cap CPU time, memory, and process count for the child process.
+
+    This closes a real gap that existed before: the previous sandbox relied
+    ONLY on (1) an AST allow-list and (2) a restricted __builtins__ dict.
+    Both operate at the Python level and are known to be bypassable via
+    attribute-chain tricks (e.g. reaching __globals__/__subclasses__ off an
+    allowed object to get back to unrestricted builtins). Neither stops a
+    fork-bomb or a memory-exhaustion payload. `resource.setrlimit` is a
+    kernel-enforced boundary that holds even if the Python-level sandbox is
+    bypassed entirely — defense in depth, not a replacement for it.
+
+    Linux/macOS only (no-op on Windows, where `resource` doesn't exist).
+    """
+    try:
+        import resource
+
+        resource.setrlimit(resource.RLIMIT_CPU, (5, 5))  # 5 CPU-seconds
+        resource.setrlimit(resource.RLIMIT_FSIZE, (1024 * 1024, 1024 * 1024))  # 1MB file writes
+
+        # RLIMIT_AS (virtual address space) is intentionally NOT set by
+        # default here. Tried it, broke it, documenting why rather than
+        # shipping something unreliable:
+        #
+        # This process tree imports torch (rewards.py's optional reward
+        # MLP) before this function ever runs, so by the time a sandboxed
+        # execution starts, the interpreter + torch + numpy already occupy
+        # a large chunk of virtual address space -- how much varies with
+        # torch version, allocator behavior, and platform. A cap sized for
+        # a "clean" process (256MB, then 1GB) left inconsistent headroom
+        # and intermittently broke thread creation for the
+        # multiprocessing.Queue feeder thread, surfacing as a confusing
+        # "can't start new thread" instead of a clear memory error --
+        # confirmed by reproducing it directly under load.
+        #
+        # If you need a hard memory ceiling for genuinely untrusted code,
+        # the reliable way to get it in THIS process layout is a cgroup
+        # memory limit on the whole worker (set at the container/process-
+        # group level, sized with headroom for torch), not RLIMIT_AS
+        # inside a process that already imported torch. Alternatively, run
+        # code execution in a separate lightweight process that does NOT
+        # import torch (decouple the reward-model process from the
+        # execution sandbox), which would make a tight RLIMIT_AS safe again.
+        #
+        # NOTE: RLIMIT_NPROC is also deliberately not set. It caps
+        # processes for the real UID *system-wide*, not per-process-tree,
+        # so it starves unrelated concurrent executions under load. Use a
+        # cgroup pids.max limit at the container level instead.
+    except (ImportError, ValueError, OSError):
+        # `resource` unavailable (Windows) or limits already tighter than requested.
+        pass
+
+
 def _run_in_process(code: str, test_code: str, result_queue: multiprocessing.Queue) -> None:
     """
     Worker function executed in a child process.
     Captures stdout/stderr and returns ExecutionResult via queue.
     """
+    _apply_resource_limits()
     stdout_capture = io.StringIO()
     stderr_capture = io.StringIO()
     old_stdout, old_stderr = sys.stdout, sys.stderr

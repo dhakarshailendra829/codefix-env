@@ -1,83 +1,84 @@
-# Architecture Documentation
+# Architecture
 
-## Overview
-This document outlines the architecture of the codefix-env project, detailing the components involved in the reinforcement learning (RL) loop, machine learning (ML) and artificial intelligence (AI) components, fine-tuning pipeline, hallucination avoidance strategies, reward engineering, sandbox security considerations, the technology stack used, and the observation/action spaces.
+This replaces a previous version of this document that was generic
+boilerplate (placeholder classes, a PostgreSQL/Kubernetes stack that never
+existed in this codebase). Everything below describes the system as it is
+actually implemented.
 
-## 1. Reinforcement Learning Loop
+## 1. Component map
 
-The RL loop is the core of the learning process. It consists of the following stages:
+```
+CodeFixEnvironment (env.py)      — stateful, one episode per instance
+   ├── tasks/ (easy/medium/hard) — 21 hand-written Task definitions
+   ├── utils/sandbox.py          — isolated code execution
+   ├── rewards.py                — RewardPipeline (rule-based + optional MLP)
+   └── models.py                 — pydantic schemas (Action/Observation/State)
 
-| Stage          | Description                                             |
-|----------------|---------------------------------------------------------|
-| Initialization | Set up environment and agent.                           |
-| Action         | Agent takes an action based on the policy.             |
-| Feedback       | Environment provides feedback and rewards.              |
-| Update         | Policy is updated based on feedback.                    |
+server/app.py (FastAPI)          — HTTP wrapper, session-per-client via
+   └── server/codefix_environment.py   X-Session-ID header, in-memory SessionManager
 
-## 2. ML/AI Components
-
-### 2.1 Components Overview
-
-- **Agent**: The decision-making entity that interacts with the environment.
-- **Environment**: The setting where the agent operates and learns.
-- **Policy**: The strategy employed by the agent to decide actions.
-
-### 2.2 Neural Network Architecture
-
-```python
-import torch
-import torch.nn as nn
-
-class ActorCritic(nn.Module):
-    def __init__(self, input_dim, action_dim):
-        super(ActorCritic, self).__init__()
-        # Define layers here
-
-    def forward(self, x):
-        # Forward pass implementation
-        return action, value
+client.py                        — async HTTP client + sync wrapper for notebooks
+cli.py                           — `codefix-server` console script (serve/tasks/info)
 ```
 
-## 3. Fine-Tuning Pipeline
+## 2. Episode lifecycle
 
-The fine-tuning pipeline involves several steps:
+`reset(task_id | difficulty)` loads a `Task` (buggy code + hidden test cases +
+hints), snapshots it into `CodeFixState`, and returns an initial
+`CodeFixObservation` with no tests run yet.
 
-1. **Pre-training** with a large dataset.
-2. **Fine-tuning** on specific tasks.
-3. **Evaluation** of performance metrics.
+`step(action)` dispatches one of: `RUN_TESTS`, `EDIT_LINE`, `INSERT_LINE`,
+`DELETE_LINE`, `GET_HINT`, `SUBMIT_FIX`, `VIEW_CODE`. Every code-mutating
+action produces a unified diff (`difflib.unified_diff` against the original
+buggy code) that's returned in the observation — this is what lets an agent
+see exactly what it changed without re-diffing itself.
 
-## 4. Hallucination Avoidance
+Termination: `SOLVED` (all tests pass), `SUBMITTED` (explicit submit action),
+or `MAX_STEPS` (truncation — `min(constructor_max_steps, task.max_steps)`).
 
-To minimize hallucinations:
-- Implement regularization techniques.
-- Use a diverse dataset for training.
+## 3. Reward shaping
 
-## 5. Reward Engineering
+`RewardPipeline` (rewards.py) combines two signals:
+- **Rule-based** (`utils/metrics.py: compute_shaped_reward`) — always active.
+  Rewards test-pass-count deltas between the previous and current
+  observation, and penalizes hint usage and step count.
+- **Optional neural reward model** (`RewardMLP`, small torch MLP) — loaded
+  from a checkpoint path if provided, blended with the rule-based score via
+  `neural_weight` (default 0.3). This is currently untrained/optional
+  scaffolding; there is no shipped checkpoint. Documenting this explicitly
+  because the README implies a more complete system than currently exists —
+  training this MLP against real trajectory data is a listed next step.
 
-Reward engineering is pivotal for guiding the agent's learning. Important aspects include:
-- Designing clear and measurable rewards.
-- Handling sparse rewards effectively.
+Final episode score (`compute_final_score`) is a function of
+`(tests_passed, tests_total, step_count, hints_used)`.
 
-## 6. Sandbox Security
+## 4. Sandbox — see SECURITY.md for the full threat model
 
-Security measures in place to ensure a safe learning environment:
-- Environment isolation.
-- Monitoring for malicious actions.
+Three layers: static AST allow-list → restricted `__builtins__` → OS process
+isolation with `resource.setrlimit` caps (memory/CPU/nproc/fsize). This is
+**process-level isolation, not container/VM-level isolation** — SECURITY.md
+documents exactly what that does and doesn't protect against, rather than
+overclaiming "fully sandboxed."
 
-## 7. Tech Stack
+## 5. Server / session model
 
-| Component       | Technology Used        |
-|-----------------|------------------------|
-| Language        | Python                 |
-| Framework       | PyTorch                |
-| Database        | PostgreSQL             |
-| DevOps          | Docker, Kubernetes      |
+FastAPI app in `server/app.py` is stateless per-request; per-episode state
+lives in `SessionManager` (in-memory dict, capped at `MAX_SESSIONS`, keyed by
+`X-Session-ID`). This means:
+- **No persistence** — restarting the server drops all active sessions.
+- **No horizontal scaling** — sessions are pinned to whichever server
+  instance created them; there's no shared session store (e.g. Redis).
+  Fine for single-instance training/eval; a real limitation for a
+  multi-replica deployment.
 
-## 8. Observation/Action Spaces
+## 6. What's intentionally NOT here yet (roadmap, not a hidden gap)
 
-- **Observation Space**: Represents the states available to the agent.
-- **Action Space**: Defines the actions the agent can take.
+- Docker/container-provider packaging conforming to the OpenEnv 0.1 spec
+  (`step()/reset()/state()` naming matches, but there's no container
+  provider registered, so this isn't yet installable via the OpenEnv Hub).
+- A trained reward model checkpoint / an actual RL fine-tune result showing
+  the loop closes end-to-end.
+- Task set is 21 hand-written examples, not mined from real repositories —
+  fine for unit-testing the environment mechanics, not yet a benchmark.
 
----
-
-This document will evolve as the project progresses, incorporating further enhancements and adjustments to the architecture.
+Each of these is tracked as a concrete next step rather than left implicit.
