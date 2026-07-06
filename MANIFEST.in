@@ -1,0 +1,4 @@
+include README.md
+include LICENSE
+include SECURITY.md
+recursive-include src/codefix_env *.py
