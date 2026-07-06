@@ -10,7 +10,6 @@ from __future__ import annotations
 import uuid
 from datetime import datetime
 from enum import Enum
-from typing import Optional
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -75,31 +74,32 @@ class CodeFixAction(BaseModel):
     """
 
     action_type: ActionType = Field(..., description="Type of action to perform")
-    line_number: Optional[int] = Field(
+    line_number: int | None = Field(
         None, ge=1, description="Target line (1-indexed, for edit/insert/delete)"
     )
-    new_content: Optional[str] = Field(None, description="New line content (for edit/insert)")
-    reasoning: Optional[str] = Field(
+    new_content: str | None = Field(None, description="New line content (for edit/insert)")
+    reasoning: str | None = Field(
         None, description="Agent's chain-of-thought (logged, not used by env)"
     )
     timestamp: datetime = Field(default_factory=datetime.utcnow)
 
     @field_validator("line_number")
     @classmethod
-    def line_required_for_edits(cls, v: Optional[int], info) -> Optional[int]:
+    def line_required_for_edits(cls, v: int | None, info) -> int | None:
         action = info.data.get("action_type")
-        if action in (ActionType.EDIT_LINE, ActionType.INSERT_LINE, ActionType.DELETE_LINE):
-            if v is None:
-                raise ValueError(f"line_number is required for action_type={action}")
+        if (
+            action in (ActionType.EDIT_LINE, ActionType.INSERT_LINE, ActionType.DELETE_LINE)
+            and v is None
+        ):
+            raise ValueError(f"line_number is required for action_type={action}")
         return v
 
     @field_validator("new_content")
     @classmethod
-    def content_required_for_edits(cls, v: Optional[str], info) -> Optional[str]:
+    def content_required_for_edits(cls, v: str | None, info) -> str | None:
         action = info.data.get("action_type")
-        if action in (ActionType.EDIT_LINE, ActionType.INSERT_LINE):
-            if v is None:
-                raise ValueError(f"new_content is required for action_type={action}")
+        if action in (ActionType.EDIT_LINE, ActionType.INSERT_LINE) and v is None:
+            raise ValueError(f"new_content is required for action_type={action}")
         return v
 
     model_config = {"use_enum_values": True}
@@ -147,7 +147,7 @@ class CodeFixObservation(BaseModel):
     max_steps: int = 20
     steps_remaining: int = 20
     done: bool = False
-    termination_reason: Optional[TerminationReason] = None
+    termination_reason: TerminationReason | None = None
 
     # Task info
     task_id: str = ""

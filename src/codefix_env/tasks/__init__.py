@@ -5,7 +5,6 @@ Task Registry — Central access point for all CodeFix tasks.
 from __future__ import annotations
 
 import random
-from typing import Optional
 
 from codefix_env.models import Difficulty, Task
 from codefix_env.tasks.easy import EASY_TASKS
@@ -30,8 +29,8 @@ def load_task(task_id: str) -> Task:
 
 
 def random_task(
-    difficulty: Optional[Difficulty] = None,
-    exclude: Optional[list[str]] = None,
+    difficulty: Difficulty | None = None,
+    exclude: list[str] | None = None,
 ) -> Task:
     """
     Return a random task, optionally filtered by difficulty and
@@ -47,7 +46,7 @@ def random_task(
     return random.choice(pool)
 
 
-def list_tasks(difficulty: Optional[Difficulty] = None) -> list[Task]:
+def list_tasks(difficulty: Difficulty | None = None) -> list[Task]:
     """List all tasks, optionally filtered by difficulty."""
     if difficulty:
         return TASKS_BY_DIFFICULTY.get(difficulty, [])

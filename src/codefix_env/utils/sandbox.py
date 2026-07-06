@@ -19,7 +19,6 @@ import textwrap
 import time
 import traceback
 from dataclasses import dataclass
-from typing import Optional
 
 
 @dataclass
@@ -208,7 +207,7 @@ _SAFE_MODULES = {
 }
 
 
-def _validate_ast(code: str) -> Optional[str]:
+def _validate_ast(code: str) -> str | None:
     """
     Static analysis: reject code with dangerous AST nodes.
     Returns error message if dangerous, None if safe.
@@ -229,9 +228,12 @@ def _validate_ast(code: str) -> Optional[str]:
             if root not in _SAFE_MODULES:
                 return f"SecurityError: import of '{module}' is not allowed in sandbox"
         # Block exec/eval/compile (but NOT __import__ - it's needed for imports)
-        if isinstance(node, ast.Call):
-            if isinstance(node.func, ast.Name) and node.func.id in ("exec", "eval", "compile"):
-                return f"SecurityError: '{node.func.id}' is not allowed in sandbox"
+        if (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Name)
+            and node.func.id in ("exec", "eval", "compile")
+        ):
+            return f"SecurityError: '{node.func.id}' is not allowed in sandbox"
     return None
 
 
@@ -301,7 +303,7 @@ def _run_in_process(code: str, test_code: str, result_queue: multiprocessing.Que
     sys.stdout = stdout_capture
     sys.stderr = stderr_capture
 
-    # ✅ FIXED: Use _SAFE_BUILTINS which now includes __import__
+    # FIXED: Use _SAFE_BUILTINS which now includes __import__
     ns: dict = {"__builtins__": _SAFE_BUILTINS}
     passed = False
     exception_str = ""

@@ -213,20 +213,20 @@ class TestRewardMLP:
 
 
 def _make_obs(**kwargs) -> CodeFixObservation:
-    defaults = dict(
-        current_code="def f(): pass",
-        original_code="def f(): pass",
-        tests_passed=0,
-        tests_total=4,
-        score_so_far=0.0,
-        step_count=1,
-        max_steps=20,
-        steps_remaining=19,
-        task_id="easy-001-missing-return",
-        difficulty=Difficulty.EASY,
-        bug_category=BugCategory.RETURN_BUG,
-        hints_used=0,
-    )
+    defaults = {
+        "current_code": "def f(): pass",
+        "original_code": "def f(): pass",
+        "tests_passed": 0,
+        "tests_total": 4,
+        "score_so_far": 0.0,
+        "step_count": 1,
+        "max_steps": 20,
+        "steps_remaining": 19,
+        "task_id": "easy-001-missing-return",
+        "difficulty": Difficulty.EASY,
+        "bug_category": BugCategory.RETURN_BUG,
+        "hints_used": 0,
+    }
     defaults.update(kwargs)
     return CodeFixObservation(**defaults)
 

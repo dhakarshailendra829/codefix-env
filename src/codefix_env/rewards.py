@@ -20,7 +20,6 @@ from __future__ import annotations
 import logging
 import os
 from pathlib import Path
-from typing import Optional
 
 from codefix_env.models import ActionType, CodeFixObservation, Task
 from codefix_env.utils.metrics import (
@@ -47,11 +46,11 @@ class RewardPipeline:
 
     def __init__(
         self,
-        cfg: ScoringConfig = ScoringConfig(),
-        neural_model_path: Optional[str] = None,
+        cfg: ScoringConfig | None = None,
+        neural_model_path: str | None = None,
         neural_weight: float = 0.3,
     ):
-        self.cfg = cfg
+        self.cfg = cfg if cfg is not None else ScoringConfig()
         self.neural_weight = neural_weight
         self._neural_model = None
 

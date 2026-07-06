@@ -20,7 +20,6 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import Optional
 
 import httpx
 
@@ -50,11 +49,11 @@ class CodeFixClient:
         self.base_url = base_url.rstrip("/")
         self.timeout = timeout
         self.max_retries = max_retries
-        self._client: Optional[httpx.AsyncClient] = None
+        self._client: httpx.AsyncClient | None = None
 
     # ── Context manager ───────────────────────────────────────────────────────
 
-    async def __aenter__(self) -> "CodeFixClient":
+    async def __aenter__(self) -> CodeFixClient:
         self._client = httpx.AsyncClient(
             base_url=self.base_url,
             timeout=self.timeout,
@@ -77,9 +76,9 @@ class CodeFixClient:
 
     async def reset(
         self,
-        task_id: Optional[str] = None,
-        difficulty: Optional[Difficulty] = None,
-        seed: Optional[int] = None,
+        task_id: str | None = None,
+        difficulty: Difficulty | None = None,
+        seed: int | None = None,
     ) -> CodeFixObservation:
         """Reset the environment and return the initial observation."""
         payload: dict = {}
@@ -102,7 +101,7 @@ class CodeFixClient:
         data = await self._get("/state")
         return CodeFixState.model_validate(data)
 
-    async def list_tasks(self, difficulty: Optional[str] = None) -> list[dict]:
+    async def list_tasks(self, difficulty: str | None = None) -> list[dict]:
         """List all available tasks."""
         params = {}
         if difficulty:
@@ -148,7 +147,7 @@ class CodeFixClient:
 
     # ── Sync wrapper ──────────────────────────────────────────────────────────
 
-    def sync(self) -> "SyncCodeFixClient":
+    def sync(self) -> SyncCodeFixClient:
         """Return a synchronous wrapper around this async client."""
         return SyncCodeFixClient(self)
 
@@ -167,9 +166,9 @@ class SyncCodeFixClient:
 
     def __init__(self, async_client: CodeFixClient):
         self._async = async_client
-        self._loop: Optional[asyncio.AbstractEventLoop] = None
+        self._loop: asyncio.AbstractEventLoop | None = None
 
-    def __enter__(self) -> "SyncCodeFixClient":
+    def __enter__(self) -> SyncCodeFixClient:
         self._loop = asyncio.new_event_loop()
         self._loop.run_until_complete(self._async.__aenter__())
         return self

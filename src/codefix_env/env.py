@@ -17,7 +17,6 @@ from __future__ import annotations
 import difflib
 import uuid
 from copy import deepcopy
-from typing import Optional
 
 import structlog
 
@@ -64,19 +63,19 @@ class CodeFixEnvironment:
         self.default_max_steps = max_steps
 
         # Episode state (initialised on reset)
-        self._task: Optional[Task] = None
-        self._state: Optional[CodeFixState] = None
-        self._obs: Optional[CodeFixObservation] = None
+        self._task: Task | None = None
+        self._state: CodeFixState | None = None
+        self._obs: CodeFixObservation | None = None
         self._current_code: str = ""
-        self._prev_obs: Optional[CodeFixObservation] = None
+        self._prev_obs: CodeFixObservation | None = None
 
     # ── Public API ────────────────────────────────────────────────────────────
 
     def reset(
         self,
-        task_id: Optional[str] = None,
-        difficulty: Optional[Difficulty] = None,
-        seed: Optional[int] = None,
+        task_id: str | None = None,
+        difficulty: Difficulty | None = None,
+        seed: int | None = None,
     ) -> CodeFixObservation:
         """
         Start a new episode.
@@ -473,7 +472,7 @@ class CodeFixEnvironment:
         """Convert raw ExecutionResult list → TestResult list."""
         assert self._task
         results = []
-        for tc, er in zip(self._task.test_cases, exec_results):
+        for tc, er in zip(self._task.test_cases, exec_results, strict=True):
             # Guard: er must be ExecutionResult not a list or other type
             if not isinstance(er, ExecutionResult):
                 er = ExecutionResult(
@@ -493,7 +492,7 @@ class CodeFixEnvironment:
 
     def _check_terminal(
         self, obs: CodeFixObservation
-    ) -> tuple[bool, bool, Optional[TerminationReason]]:
+    ) -> tuple[bool, bool, TerminationReason | None]:
         """Returns (done, truncated, reason)."""
         if obs.all_tests_pass:
             return True, False, TerminationReason.SOLVED

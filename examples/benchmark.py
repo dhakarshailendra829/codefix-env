@@ -52,8 +52,11 @@ console = Console()
 class BaseAgent(ABC):
     """Abstract base for benchmark agents."""
 
-    def reset(self, obs: CodeFixObservation) -> None:
-        """Called at the start of each episode."""
+    def reset(self, obs: CodeFixObservation) -> None:  # noqa: B027
+        """Called at the start of each episode. Optional override — not
+        every agent needs reset-time state, so this is intentionally
+        concrete (not @abstractmethod) rather than forcing every subclass
+        to implement a no-op."""
         pass
 
     @abstractmethod
@@ -136,7 +139,9 @@ class OracleAgent(BaseAgent):
         curr_lines = obs.current_code.splitlines()
 
         # Find first differing line
-        for i, (curr, sol) in enumerate(zip(curr_lines, self._solution_lines), start=1):
+        for i, (curr, sol) in enumerate(
+            zip(curr_lines, self._solution_lines, strict=True), start=1
+        ):
             if curr != sol:
                 return CodeFixAction(
                     action_type=ActionType.EDIT_LINE,
@@ -223,10 +228,7 @@ def run_benchmark(
     """Run agent against all (or filtered) tasks."""
     env = CodeFixEnvironment()
 
-    if difficulty == "all":
-        tasks = list_tasks()
-    else:
-        tasks = list_tasks(difficulty=Difficulty(difficulty))
+    tasks = list_tasks() if difficulty == "all" else list_tasks(difficulty=Difficulty(difficulty))
 
     tasks = tasks[:max_tasks]
     summary = BenchmarkSummary(agent_name=agent.name)

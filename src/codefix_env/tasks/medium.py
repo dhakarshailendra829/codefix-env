@@ -195,10 +195,10 @@ def fizzbuzz(n):
             TestCase(name="test_first_call", code="assert append_item(1) == [1]"),
             TestCase(
                 name="test_second_call",
-                code=""" 
-                    assert append_item(1) == [1] 
+                code="""
+                    assert append_item(1) == [1]
                     assert append_item(2) == [2]""",
-            ),  # ✅ CHANGED from [2] expectation
+            ),  # CHANGED from [2] expectation
             TestCase(name="test_with_list", code="assert append_item(3, [10, 20]) == [10, 20, 3]"),
         ],
     ),

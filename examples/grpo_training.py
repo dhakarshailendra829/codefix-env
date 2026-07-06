@@ -27,7 +27,6 @@ import json
 import logging
 import os
 import sys
-from typing import Optional
 
 from codefix_env.client import CodeFixClient
 from codefix_env.models import CodeFixAction
@@ -113,7 +112,7 @@ class CodeFixRewardFunction:
         Returns a list of rewards.
         """
         rewards = []
-        for prompt, completion in zip(prompts, completions):
+        for prompt, completion in zip(prompts, completions, strict=True):
             reward = asyncio.run(self._eval_single(prompt, completion, kwargs))
             rewards.append(reward)
         return rewards
@@ -159,7 +158,7 @@ class CodeFixRewardFunction:
 # ── Training Loop ─────────────────────────────────────────────────────────────
 
 
-def build_dataset(num_episodes: int = 100, task_ids: Optional[list[str]] = None):
+def build_dataset(num_episodes: int = 100, task_ids: list[str] | None = None):
     """
     Build a HuggingFace Dataset of (prompt, session_id) pairs for GRPO.
     Each row = one environment reset + initial observation.

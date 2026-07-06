@@ -53,8 +53,10 @@ def compute_shaped_reward(
     step_count: int,
     hints_used: int,
     action_type: str,
-    cfg: ScoringConfig = ScoringConfig(),
+    cfg: ScoringConfig | None = None,
 ) -> float:
+    if cfg is None:
+        cfg = ScoringConfig()
     """
     Dense, shaped reward for a single step.
 
@@ -92,8 +94,10 @@ def compute_final_score(
     tests_total: int,
     step_count: int,
     hints_used: int,
-    cfg: ScoringConfig = ScoringConfig(),
+    cfg: ScoringConfig | None = None,
 ) -> float:
+    if cfg is None:
+        cfg = ScoringConfig()
     """
     Final episode score in [0, 1].
 
