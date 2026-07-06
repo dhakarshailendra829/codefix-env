@@ -8,7 +8,7 @@ version = "0.2.1"
 description = "A high-performance PyTorch-based RL environment for automated code debugging and LLM agent evaluation"
 readme = "README.md"
 license = { file = "LICENSE" }
-authors = [{ name = "Shailendra Dhakar", email = "dhakarshailendra829@gmail.com" }]
+authors = [{ name = "Shailendra Dhakad", email = "dhakarshailendra829@gmail.com" }]
 keywords = ["reinforcement-learning", "pytorch", "llm", "code-debugging", "gymnasium", "openenv", "rl-environment", "genai"]
 classifiers = [
     "Development Status :: 3 - Alpha",
