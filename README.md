@@ -66,7 +66,7 @@ We do that by:
 
 Our goal is to grow this into a task set and training result large enough to serve as a genuine benchmark and training ground for code-repair agents, in the same way SWE-bench did for repository-scale evaluation.
 
-<sup>1</sup> https://arxiv.org/abs/2310.06770
+<sup>1</sup> https://arXiv:2607.XXXXX, 2026
 
 ---
 
