@@ -13,7 +13,7 @@ Quick start::
         result = await env.step(CodeFixAction(action_type="submit_fix"))
 """
 
-__version__ = "0.2.1"
+__version__ = "0.2.2"
 __author__ = "Shailendra Dhakad"
 
 from codefix_env.client import CodeFixClient, SyncCodeFixClient

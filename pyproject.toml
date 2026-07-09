@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "codefix-env"
-version = "0.2.1"
+version = "0.2.2"
 description = "A high-performance PyTorch-based RL environment for automated code debugging and LLM agent evaluation"
 readme = "README.md"
 license = { file = "LICENSE" }
