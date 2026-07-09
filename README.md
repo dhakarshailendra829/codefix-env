@@ -1,6 +1,10 @@
 <div align="center">
 
-<h1>CodeFix-Env</h1>
+<p align="center">
+  <img src="docs/logo/codefix_logo.png" alt="CodeFix-Env" width="360" />
+</p>
+
+<h1>CodeFix-Env v0.2.3: Code Debugging Environment</h1>
 
 <p>A sandboxed reinforcement learning environment for training and evaluating LLM agents on automated code debugging, and the fast, verifiable feedback loop that kind of training requires.</p>
 
