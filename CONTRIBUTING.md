@@ -1,62 +1,70 @@
 # Contributing to CodeFix-Env
 
-Thank you for contributing! This guide covers everything you need.
+Thanks for contributing. This guide covers local setup, adding tasks, code style, and the pull request process.
 
----
-
-## Development Setup
+## Development setup
 
 ```bash
-git clone https://github.com/dhakarshailendra829/codefix-env
+git clone https://github.com/dhakarshailendra829/codefix-env.git
 cd codefix-env
 
-# Create virtual environment
-python -m venv .venv
-source .venv/bin/activate  # Windows: .venv\Scripts\activate
+# Create a virtual environment
+python -m venv venv
+source venv/bin/activate      # Windows: venv\Scripts\activate
 
-# Install in editable mode with dev deps
+# Install in editable mode with dev dependencies
 pip install -e ".[dev]"
 
 # Install pre-commit hooks
 pre-commit install
 ```
 
----
+If you only want to use the package rather than develop it, the published release is on PyPI:
 
-## Running Tests
+```bash
+pip install codefix-env
+```
+
+Confirm either install with:
+
+```bash
+codefix-server info
+```
+
+## Running tests
 
 ```bash
 # All tests
-pytest tests/ -v
+PYTHONPATH=src pytest tests/ -v
 
 # Specific file
-pytest tests/test_env.py -v
+PYTHONPATH=src pytest tests/test_env.py -v
 
 # With coverage
-pytest tests/ --cov=src/codefix_env --cov-report=html
+PYTHONPATH=src pytest tests/ --cov=src/codefix_env --cov-report=html
 open htmlcov/index.html
 
-# Just sandbox tests (fast, no heavy deps)
-pytest tests/test_tasks.py::TestSandbox -v
+# Sandbox tests only (fast, no heavy deps)
+PYTHONPATH=src pytest tests/test_tasks.py::TestSandbox -v
 ```
 
----
+All 197 existing tests should pass before you start, and before you open a pull request.
 
-## Adding a New Debugging Task
+## Adding a new debugging task
 
-Tasks live in `src/codefix_env/tasks/` — pick `easy.py`, `medium.py`, or `hard.py`.
+Tasks live in `src/codefix_env/tasks/` — add to `easy.py`, `medium.py`, or `hard.py` depending on difficulty.
 
-### Task Template
+### Task template
 
 ```python
 Task(
-    id="easy-009-your-task-name",        # must be unique, follow pattern
+    id="easy-009-your-task-name",        # must be unique, follow the existing pattern
     title="Clear Short Title",
     description="One sentence: what is the bug?",
     difficulty=Difficulty.EASY,
     bug_category=BugCategory.LOGIC,
     tags=["relevant", "tags"],
-    max_steps=10,                         # 8-12 for easy, 12-18 for medium, 20-25 for hard
+    max_steps=10,                         # 8-12 easy, 12-18 medium, 20-25 hard
     buggy_code="""\
 def your_function(x):
     return x + 1   # BUG: should be x - 1
@@ -77,21 +85,21 @@ def your_function(x):
 )
 ```
 
-### Checklist Before Submitting
+### Checklist before submitting a task
 
-- [ ] Task ID is unique (`task_id` not in `ALL_TASKS`)
+- [ ] Task ID is unique (not already present in the registry)
 - [ ] At least 3 test cases
 - [ ] At least 1 hint
 - [ ] `buggy_code` fails at least one test
-- [ ] `solution_code` passes ALL tests
-- [ ] Run `pytest tests/test_tasks.py -v` and confirm all pass
+- [ ] `solution_code` passes all tests
+- [ ] `pytest tests/test_tasks.py -v` passes
 - [ ] Added to the appropriate `EASY_TASKS` / `MEDIUM_TASKS` / `HARD_TASKS` list
 
----
+Tasks mined from real bug-fix commits via `scripts/mine_tasks.py` are also welcome, following the same checklist after human review — see the script's docstring for usage.
 
-## Code Style
+## Code style
 
-We use `ruff`, `black`, and `isort`. Run before committing:
+Enforced with `ruff`, `black`, and `isort`. Run before committing:
 
 ```bash
 ruff check src/ tests/ --fix
@@ -99,36 +107,32 @@ black src/ tests/ examples/
 isort src/ tests/ examples/
 ```
 
-Or just:
+Or, with pre-commit installed:
+
 ```bash
 pre-commit run --all-files
 ```
 
----
+## Pull request process
 
-## Pull Request Process
+1. Fork the repository.
+2. Create a feature branch: `git checkout -b feat/add-task-fibonacci-v2`.
+3. Make your changes.
+4. Run the full test suite: `PYTHONPATH=src pytest tests/ -v`.
+5. Update `README.md` or `ARCHITECTURE.md` if the change affects what they describe — documentation that drifts from the code is treated as a bug here.
+6. Open the pull request with a clear description of what changed and why, and fill out the PR template.
 
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feat/add-task-fibonacci-v2`
-3. Make your changes
-4. Run the full test suite: `pytest tests/ -v`
-5. Submit PR with a clear description
-6. Fill out the PR template
+## Reporting bugs
 
----
+Use the [bug report template](.github/ISSUE_TEMPLATE/bug_report.md) and include:
 
-## Reporting Bugs
-
-Use the [Bug Report template](.github/ISSUE_TEMPLATE/bug_report.md).
-
-Please include:
 - Python version
-- CodeFix-Env version (`python -c "import codefix_env; print(codefix_env.__version__)"`)
+- CodeFix-Env version: `python -c "import codefix_env; print(codefix_env.__version__)"`
 - Minimal reproduction code
 - Full traceback
 
----
+For a suspected sandbox escape or other security-relevant defect, do not open a public issue — see `SECURITY.md` for private reporting instructions.
 
-## Code of Conduct
+## Code of conduct
 
-Be kind. See [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md).
+Be respectful. See [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md).
