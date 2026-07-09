@@ -58,7 +58,7 @@ Tasks live in `src/codefix_env/tasks/` — add to `easy.py`, `medium.py`, or `ha
 
 ```python
 Task(
-    id="easy-009-your-task-name",        # must be unique, follow the existing pattern
+    id="easy-009-your-task-name",        # must be unique, follow the existing patterns 
     title="Clear Short Title",
     description="One sentence: what is the bug?",
     difficulty=Difficulty.EASY,
