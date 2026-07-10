@@ -221,6 +221,7 @@ class Task(BaseModel):
     test_cases: list[TestCase]
     difficulty: Difficulty
     bug_category: BugCategory
+    language: str = "python"  # "python" | "cpp" — see utils/executors/
     tags: list[str] = Field(default_factory=list)
     hints: list[str] = Field(default_factory=list)
     max_steps: int = 20

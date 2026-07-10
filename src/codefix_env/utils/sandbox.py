@@ -18,19 +18,10 @@ import sys
 import textwrap
 import time
 import traceback
-from dataclasses import dataclass
 
+from codefix_env.utils.result_types import ExecutionResult
 
-@dataclass
-class ExecutionResult:
-    """Result of a sandboxed code execution."""
-
-    stdout: str = ""
-    stderr: str = ""
-    exception: str = ""
-    passed: bool = False
-    runtime_ms: float = 0.0
-    timed_out: bool = False
+__all__ = ["ExecutionResult", "run_code", "run_all_tests"]
 
 
 # Builtins allowed in sandbox (no I/O, no network, no os)
@@ -378,14 +369,32 @@ def run_code(code: str, test_code: str = "", timeout_s: float = 5.0) -> Executio
         )
 
 
-def run_all_tests(code: str, test_cases: list, timeout_s: float = 5.0) -> list[ExecutionResult]:
+def run_all_tests(
+    code: str, test_cases: list, timeout_s: float = 5.0, language: str = "python"
+) -> list[ExecutionResult]:
     """
     Run all test cases against the given code.
     Each test is isolated (imports/state don't leak between tests).
+
+    `language` defaults to "python" and dispatches exactly as before —
+    existing callers that don't pass `language` see no behavior change.
+    Other languages route through the executor registry.
     """
+    if language == "python":
+        results = []
+        for tc in test_cases:
+            res = run_code(
+                code, tc.code, timeout_s=tc.timeout_s if hasattr(tc, "timeout_s") else timeout_s
+            )
+            results.append(res)
+        return results
+
+    from codefix_env.utils.executors import get_executor
+
+    executor = get_executor(language)
     results = []
     for tc in test_cases:
-        res = run_code(
+        res = executor.run_test(
             code, tc.code, timeout_s=tc.timeout_s if hasattr(tc, "timeout_s") else timeout_s
         )
         results.append(res)

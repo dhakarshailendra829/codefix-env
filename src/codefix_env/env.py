@@ -255,7 +255,9 @@ class CodeFixEnvironment:
             )
 
     def _action_run_tests(self) -> tuple[CodeFixObservation, float]:
-        results = run_all_tests(self._current_code, self._task.test_cases)
+        results = run_all_tests(
+            self._current_code, self._task.test_cases, language=self._task.language
+        )
         test_results = self._parse_results(results)
         passed = sum(1 for r in test_results if r.passed)
         obs = self._build_observation(
@@ -369,7 +371,9 @@ class CodeFixEnvironment:
 
     def _action_submit(self) -> tuple[CodeFixObservation, float]:
         """Run all tests and compute final reward."""
-        results = run_all_tests(self._current_code, self._task.test_cases)
+        results = run_all_tests(
+            self._current_code, self._task.test_cases, language=self._task.language
+        )
         test_results = self._parse_results(results)
         passed = sum(1 for r in test_results if r.passed)
 
@@ -378,9 +382,9 @@ class CodeFixEnvironment:
             test_results=test_results,
             shaped_reward=0.0,
             feedback=(
-                f"✅ Submitted! {passed}/{len(test_results)} tests passing."
+                f"Submitted! {passed}/{len(test_results)} tests passing."
                 if passed == len(test_results)
-                else f"❌ Submitted with {passed}/{len(test_results)} tests passing."
+                else f"Submitted with {passed}/{len(test_results)} tests passing."
             ),
         )
         obs.done = True

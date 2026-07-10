@@ -7,15 +7,18 @@ from __future__ import annotations
 import random
 
 from codefix_env.models import Difficulty, Task
+from codefix_env.tasks.cpp.easy import CPP_EASY_TASKS
 from codefix_env.tasks.easy import EASY_TASKS
 from codefix_env.tasks.hard import HARD_TASKS
 from codefix_env.tasks.medium import MEDIUM_TASKS
 
 # ── Master registry ──────────────────────────────────────────────────────────
-ALL_TASKS: dict[str, Task] = {task.id: task for task in EASY_TASKS + MEDIUM_TASKS + HARD_TASKS}
+ALL_TASKS: dict[str, Task] = {
+    task.id: task for task in EASY_TASKS + MEDIUM_TASKS + HARD_TASKS + CPP_EASY_TASKS
+}
 
 TASKS_BY_DIFFICULTY: dict[Difficulty, list[Task]] = {
-    Difficulty.EASY: EASY_TASKS,
+    Difficulty.EASY: EASY_TASKS + CPP_EASY_TASKS,
     Difficulty.MEDIUM: MEDIUM_TASKS,
     Difficulty.HARD: HARD_TASKS,
 }
@@ -56,7 +59,7 @@ def list_tasks(difficulty: Difficulty | None = None) -> list[Task]:
 def task_count() -> dict[str, int]:
     """Return count of tasks by difficulty."""
     return {
-        "easy": len(EASY_TASKS),
+        "easy": len(EASY_TASKS) + len(CPP_EASY_TASKS),
         "medium": len(MEDIUM_TASKS),
         "hard": len(HARD_TASKS),
         "total": len(ALL_TASKS),

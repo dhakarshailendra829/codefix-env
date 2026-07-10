@@ -57,11 +57,16 @@ class TestTaskRegistry:
         assert task.difficulty == "easy"
 
     def test_random_task_with_exclude(self):
-        easy_ids = [t.id for t in EASY_TASKS]
-        # Exclude all but one
-        exclude = easy_ids[:-1]
+        from codefix_env.tasks import TASKS_BY_DIFFICULTY
+
+        all_easy_ids = [t.id for t in TASKS_BY_DIFFICULTY[Difficulty.EASY]]
+        # Exclude all but one — checks the exclusion contract, not a
+        # hardcoded remaining ID, so it stays correct as more easy
+        # tasks (including non-Python ones) get added.
+        exclude = all_easy_ids[:-1]
         task = random_task(difficulty=Difficulty.EASY, exclude=exclude)
-        assert task.id == easy_ids[-1]
+        assert task.id == all_easy_ids[-1]
+        assert task.id not in exclude
 
     def test_random_task_all_excluded_raises(self):
         all_ids = list(ALL_TASKS.keys())
@@ -108,7 +113,7 @@ class TestSolutionCorrectness:
 
     @pytest.mark.parametrize("task", list(ALL_TASKS.values()))
     def test_solution_passes_all_tests(self, task: Task):
-        results = run_all_tests(task.solution_code, task.test_cases)
+        results = run_all_tests(task.solution_code, task.test_cases, language=task.language)
         failed = [
             (task.test_cases[i].name, r.exception or r.stderr)
             for i, r in enumerate(results)
@@ -121,7 +126,7 @@ class TestSolutionCorrectness:
     @pytest.mark.parametrize("task", EASY_TASKS + MEDIUM_TASKS)
     def test_buggy_code_fails_at_least_one_test(self, task: Task):
         """Sanity check: buggy code should fail at least one test."""
-        results = run_all_tests(task.buggy_code, task.test_cases)
+        results = run_all_tests(task.buggy_code, task.test_cases, language=task.language)
         all_pass = all(r.passed for r in results)
         assert (
             not all_pass
@@ -196,7 +201,7 @@ class TestSandbox:
             TestCase(name="t2", code="assert add(0,0)==0"),
             TestCase(name="t3", code="assert add(-1,1)==0"),
         ]
-        results = run_all_tests(code, tests)
+        results = run_all_tests(code, tests, language="python")
         assert len(results) == 3
         assert all(r.passed for r in results)
 
