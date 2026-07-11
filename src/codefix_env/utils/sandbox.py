@@ -344,9 +344,24 @@ def run_code(code: str, test_code: str = "", timeout_s: float = 5.0) -> Executio
     if err := _validate_ast(full_code):
         return ExecutionResult(exception=err, passed=False)
 
-    # Run in child process for isolation
-    q: multiprocessing.Queue = multiprocessing.Queue()
-    proc = multiprocessing.Process(
+    # Run in child process for isolation.
+    #
+    # Explicitly use the "spawn" start method rather than the platform
+    # default. On Linux, multiprocessing.Process() defaults to fork(),
+    # which copies the ENTIRE parent memory image into every child --
+    # including PyTorch, if anything in the same test/training session
+    # already imported it (e.g. RewardMLP tests running earlier in the
+    # same pytest process). Combined with coverage.py tracing every
+    # forked child, running ~200 sandboxed executions in one CI session
+    # compounded into an OOM kill on GitHub's 7GB runner, confirmed by
+    # the kill point moving later (not disappearing) after the first
+    # resource-cleanup fix -- the leak was real but this was the larger
+    # cause. spawn starts each child as a fresh, minimal interpreter that
+    # does not inherit torch or the parent's coverage trace state, at the
+    # cost of slightly higher per-call startup time versus fork.
+    ctx = multiprocessing.get_context("spawn")
+    q: multiprocessing.Queue = ctx.Queue()
+    proc = ctx.Process(
         target=_run_in_process,
         args=(full_code, full_test, q),
         daemon=True,
