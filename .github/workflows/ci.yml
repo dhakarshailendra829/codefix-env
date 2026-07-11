@@ -37,7 +37,12 @@ jobs:
         run: mypy src/codefix_env/ --ignore-missing-imports
         continue-on-error: true   # tighten later
 
-      - name: Run tests with coverage
+      - name: Run tests
+        run: |
+          PYTHONPATH=src pytest tests/ -v --timeout=60 -p no:cacheprovider
+
+      - name: Run tests with coverage (py3.11 only)
+        if: matrix.python-version == '3.11'
         run: |
           PYTHONPATH=src pytest tests/ -v --timeout=60 -p no:cacheprovider \
             --cov=src/codefix_env --cov-report=xml --cov-report=term

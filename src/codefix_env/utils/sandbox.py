@@ -344,21 +344,15 @@ def run_code(code: str, test_code: str = "", timeout_s: float = 5.0) -> Executio
     if err := _validate_ast(full_code):
         return ExecutionResult(exception=err, passed=False)
 
-    # Run in child process for isolation.
-    #
-    # Explicitly use the "spawn" start method rather than the platform
-    # default. On Linux, multiprocessing.Process() defaults to fork(),
-    # which copies the ENTIRE parent memory image into every child --
-    # including PyTorch, if anything in the same test/training session
-    # already imported it (e.g. RewardMLP tests running earlier in the
-    # same pytest process). Combined with coverage.py tracing every
-    # forked child, running ~200 sandboxed executions in one CI session
-    # compounded into an OOM kill on GitHub's 7GB runner, confirmed by
-    # the kill point moving later (not disappearing) after the first
-    # resource-cleanup fix -- the leak was real but this was the larger
-    # cause. spawn starts each child as a fresh, minimal interpreter that
-    # does not inherit torch or the parent's coverage trace state, at the
-    # cost of slightly higher per-call startup time versus fork.
+    # spawn (not fork, see comment history) for a fresh child interpreter
+    # per execution, avoiding inherited torch/coverage state from the
+    # parent. Reverted the earlier SimpleQueue attempt: SimpleQueue.get()
+    # does not accept a timeout argument (unlike Queue.get()), which made
+    # every single call raise TypeError and get swallowed by the except
+    # below as a spurious "process exited without result" -- confirmed by
+    # every test failing identically, including trivially fast ones that
+    # have no plausible resource-pressure explanation. Queue's feeder
+    # thread overhead is the accepted cost of keeping timeout() support.
     ctx = multiprocessing.get_context("spawn")
     q: multiprocessing.Queue = ctx.Queue()
     proc = ctx.Process(
@@ -392,6 +386,7 @@ def run_code(code: str, test_code: str = "", timeout_s: float = 5.0) -> Executio
         # even though every individual test passes — confirmed by the
         # process being killed only after all 202 tests had already
         # completed, during coverage report generation.
+        # SimpleQueue has no .join_thread() (no feeder thread to join).
         q.close()
         q.join_thread()
         if proc.is_alive():
