@@ -354,19 +354,34 @@ def run_code(code: str, test_code: str = "", timeout_s: float = 5.0) -> Executio
     proc.start()
     proc.join(timeout=timeout_s)
 
-    if proc.is_alive():
-        proc.terminate()
-        proc.join()
-        return ExecutionResult(timed_out=True, exception=f"TimeoutError: exceeded {timeout_s}s")
-
     try:
-        result = q.get(timeout=0.5)
-        return result
-    except Exception:
-        return ExecutionResult(
-            exception="ExecutionError: process exited without result",
-            passed=False,
-        )
+        if proc.is_alive():
+            proc.terminate()
+            proc.join()
+            return ExecutionResult(timed_out=True, exception=f"TimeoutError: exceeded {timeout_s}s")
+
+        try:
+            result = q.get(timeout=0.5)
+            return result
+        except Exception:
+            return ExecutionResult(
+                exception="ExecutionError: process exited without result",
+                passed=False,
+            )
+    finally:
+        # Explicitly release subprocess/pipe resources rather than relying
+        # on GC timing. Without this, running many hundreds of sandboxed
+        # executions in one pytest session (as CI does) accumulates open
+        # file descriptors and process handles faster than they're
+        # reclaimed, causing an OOM kill on memory-constrained CI runners
+        # even though every individual test passes — confirmed by the
+        # process being killed only after all 202 tests had already
+        # completed, during coverage report generation.
+        q.close()
+        q.join_thread()
+        if proc.is_alive():
+            proc.kill()
+        proc.close()
 
 
 def run_all_tests(
